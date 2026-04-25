@@ -11,28 +11,38 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <script>
+        if (localStorage.theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-200">
+    <body class="font-sans antialiased bg-white dark:bg-gray-900">
 
-        <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex flex-col">
 
-            @include('layouts.navigation')
+        @include('layouts.navigation')
 
-            @isset($header)
-                <header class="bg-gray-200 text-white shadow">
-                    <div class=" max-w-7xl mx-auto py-6 px-4">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+        @isset($header)
+            <header class="bg-white dark:bg-gray-900">
+                <div class="max-w-7xl mx-auto py-6 px-4">
+                    {{ $header }}
+                </div>
+            </header>
+        @endisset
 
-            <main class="flex-1">
-                {{ $slot }}
-            </main>
+        <main class="flex-1">
+            {{ $slot }}
+        </main>
 
-        </div>
+        @include('layouts.footer')
+
+    </div>
 
     </body>
 </html>

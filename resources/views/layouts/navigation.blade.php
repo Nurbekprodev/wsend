@@ -1,101 +1,109 @@
-<nav x-data="{ open: false }" class=" border-b bg-gray-300 border-gray-300">
+<nav x-data="{ open: false }" class=" p-4 sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-800/80">
+    <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20 py-4">
+        <!-- Logo -->
+        <a href="{{ url('/') }}" class="flex items-center">
+            <x-application-logo class="mr-3 h-6 sm:h-9 w-auto" />
+        </a>
 
-            <!-- Left -->
-            <div class="flex items-center">
-                <a href="{{ url('/') }}">
-                    <x-application-logo class="h-9 w-auto text-gray-900" />
+        <!-- Right side -->
+        <div class="flex items-center lg:order-2">
+
+        <!-- Dark mode button -->
+            <button 
+                @click="
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.theme =
+                        document.documentElement.classList.contains('dark')
+                        ? 'dark'
+                        : 'light';
+                "
+                class="p-2 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
+                🌙
+            </button>
+
+            @guest
+                <a href="{{ route('login') }}"
+                   class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 mr-2 dark:hover:bg-gray-700">
+                    Login
                 </a>
 
-                <div class="hidden sm:flex sm:ml-10 space-x-8">
-                    <x-nav-link :href="url('/')" :active="request()->is('/')">
-                        Home
-                    </x-nav-link>
+                <a href="{{ route('register') }}"
+                   class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 mr-2 dark:bg-primary-600 dark:hover:bg-primary-700">
+                    Register
+                </a>
+            @endguest
 
-                    <x-nav-link :href="url('upload')" :active="request()->is('upload')">
-                        Upload
-                    </x-nav-link>
+            @auth
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="text-gray-800 dark:text-white hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2 dark:hover:bg-gray-700">
+                            {{ auth()->user()->name }}
+                        </button>
+                    </x-slot>
 
-                    @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            Dashboard
-                        </x-nav-link>
-                    @endauth
-                </div>
-            </div>
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.edit')">
+                            Profile
+                        </x-dropdown-link>
 
-            <!-- Right -->
-            <div class="flex items-center">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-dropdown-link :href="route('logout')"
+                                onclick="event.preventDefault(); this.closest('form').submit();">
+                                Log Out
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            @endauth
 
-                @guest
-                    <div class="flex gap-4">
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-white bg-teal-600 rounded-md">
-                            Login
-                        </a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 text-teal-600 bg-gray-100 rounded-md">
-                            Register
-                        </a>
-                    </div>
-                @endguest
+            <!-- mobile button -->
+            <button @click="open = !open" type="button"
+                class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700">
+                ☰
+            </button>
+        </div>
+
+        <!-- Menu -->
+        <div :class="{ 'hidden': !open }"
+             class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1">
+
+            <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
+
+                <li>
+                    <a href="{{ url('/') }}"
+                    class="block py-2 pr-4 pl-3 rounded lg:p-0
+                    {{ request()->is('/') 
+                        ? 'text-white bg-primary-700 lg:bg-transparent lg:text-primary-700 dark:text-white' 
+                        : 'text-gray-700 hover:text-primary-700 dark:text-gray-400 lg:dark:hover:text-white' }}">
+                    Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url('upload') }}"
+                    class="block py-2 pr-4 pl-3 rounded lg:p-0
+                    {{ request()->is('upload') 
+                        ? 'text-white bg-primary-700 lg:bg-transparent lg:text-primary-700 dark:text-white' 
+                        : 'text-gray-700 hover:text-primary-700 dark:text-gray-400 lg:dark:hover:text-white' }}">
+                    Upload
+                    </a>
+                </li>
 
                 @auth
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="px-3 py-2 text-sm text-gray-600">
-                                {{ auth()->user()->name }}
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">
-                                Profile
-                            </x-dropdown-link>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Log Out
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
+                <li>
+                    <a href="{{ route('dashboard') }}"
+                    class="block py-2 pr-4 pl-3 rounded lg:p-0
+                    {{ request()->routeIs('dashboard') 
+                        ? 'text-white bg-primary-700 lg:bg-transparent lg:text-primary-700 dark:text-white' 
+                        : 'text-gray-700 hover:text-primary-700 dark:text-gray-400 lg:dark:hover:text-white' }}">
+                    Dashboard
+                    </a>
+                </li>
                 @endauth
 
-                <!-- Mobile button -->
-                <button @click="open = ! open" class="sm:hidden ml-2">
-                    ☰
-                </button>
-
-            </div>
+            </ul>
         </div>
     </div>
-
-    <!-- Mobile -->
-    <div x-show="open" class="sm:hidden px-4 pb-3 space-y-2 grid grid-cols-1">
-
-        <a href="{{ url('/') }}">Home</a>
-        <a href="{{ route('dashboard') }}">Dashboard</a>
-
-        @auth
-            <a href="{{ route('profile.edit') }}">Profile</a>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit">Logout</button>
-            </form>
-        @endauth
-    </div>
-
-    <div x-show="open" class="sm:hidden px-4 pb-3 space-y-2 grid grid-cols-1">
-
-        @guest
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}">Register</a>
-        @endguest
-
-    </div>
-
 </nav>

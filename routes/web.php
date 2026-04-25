@@ -12,7 +12,7 @@ Route::get('/dashboard', [FileController::class, 'index'])->middleware(['auth', 
 
 // upload
 Route::get('/upload', [FileController::class, 'upload']);
-Route::post('/upload', [FileController::class, 'store']);
+Route::post('/upload', [FileController::class, 'store'])->middleware('auth');
 
 // share & download file
 Route::get('/file/{token}', [FileController::class, 'show']);
@@ -28,7 +28,9 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
+Route::get('/test', function (){
+    return  view('welcome');
+});
 
 
 

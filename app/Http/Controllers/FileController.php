@@ -11,7 +11,9 @@ use Illuminate\Support\Str;
 class FileController extends Controller
 {
     public function index(){
-        $files = File::latest()->get();
+        $files = File::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(10);
         return view('dashboard', ['files' => $files]);
     }
 
@@ -36,8 +38,8 @@ class FileController extends Controller
         if (!$path) {
             throw new \Exception("File upload failed");
         }
-        
-        File::create([
+
+        $model = File::create([
             'user_id' => Auth::id(),
             'original_name' => $file->getClientOriginalName(),
             'file_path' => $path,
@@ -45,7 +47,7 @@ class FileController extends Controller
             'token' => Str::random(20),
         ]);
 
-        return back()->with('success', 'File uploaded successfully.');
+        return back()->with('link', url('/file/' . $model->token));
     }
 
     public function download($token)
@@ -56,7 +58,9 @@ class FileController extends Controller
     }
 
     public function destroy($id){
-        $file = File::findOrFail($id); 
+        $file = File::where('id', $id)
+           ->where('user_id', auth()->id())
+           ->firstOrFail();
         // dd($file->file_path);
         Storage::disk('local')->delete($file->file_path);
 
