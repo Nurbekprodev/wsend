@@ -20,7 +20,7 @@
         </div>
     </section>
 
-    
+    <div class="my-10  h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700"></div>
     <!-- Upload box section -->
     <section class="bg-white dark:bg-gray-900">
         <div class="max-w-2xl mx-auto px-4 py-12 text-center">

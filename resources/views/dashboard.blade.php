@@ -20,6 +20,7 @@
                         <tr>
                             <th class="px-6 py-3">File</th>
                             <th class="px-6 py-3">Share</th>
+                            <th class="px-6 py-3">Download</th>
                             <th class="px-6 py-3 text-right">Action</th>
                         </tr>
                     </thead>
@@ -32,32 +33,56 @@
                                     {{ $file->original_name }}
                                 </td>
 
+                                <!-- Share -->
                                 <td class="px-6 py-4">
                                     <button 
-                                    onclick="navigator.clipboard.writeText('{{ url('/file/'.$file->token) }}')"
-                                    class="text-white bg-primary-700 hover:bg-primary-800 
+                                    onclick="
+                                        navigator.clipboard.writeText('{{ url('/file/'.$file->token) }}');
+                                        const btn = this;
+                                        const original = btn.innerText;
+                                        btn.innerText = 'Copied!';
+                                        btn.classList.remove('bg-primary-700');
+                                        btn.classList.add('bg-green-600');
+                                        setTimeout(() => {
+                                            btn.innerText = original;
+                                            btn.classList.remove('bg-green-600');
+                                            btn.classList.add('bg-primary-700');
+                                        }, 1500);
+                                    "
+                                    class="inline-flex items-center text-white bg-primary-700 hover:bg-primary-800 
                                     focus:ring-4 focus:ring-primary-300 font-medium rounded-lg 
                                     text-xs px-3 py-2 dark:bg-primary-600 dark:hover:bg-primary-700">
-                                    Share
+                                    Copy link
                                     </button>
                                 </td>
 
+                                <!-- Download -->
+                                <td class="px-6 py-4">
+                                    <a href="/file/{{ $file->token }}"
+                                    class="inline-flex items-center text-white bg-gray-700 hover:bg-gray-800 
+                                    focus:ring-4 focus:ring-gray-300 font-medium rounded-lg 
+                                    text-xs px-3 py-2 dark:bg-gray-600 dark:hover:bg-gray-700">
+                                    Download
+                                    </a>                    
+                                </td>
+
+                                <!-- Delete -->
                                 <td class="px-6 py-4 text-right">
                                     <form action="/file/{{ $file->id }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-
-                                        <button 
-                                        class="text-red-600 hover:underline dark:text-red-500">
-                                            Delete
-                                        </button>
+                                <button 
+                                onclick="return confirm('Delete this file?')"
+                                class="font-medium text-red-600 hover:underline dark:text-red-500">
+                                    Delete
+                                </button>
                                     </form>
                                 </td>
 
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
                                     No files uploaded yet
                                 </td>
                             </tr>
