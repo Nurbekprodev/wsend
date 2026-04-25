@@ -5,10 +5,7 @@
         <div class="md:flex md:justify-between">
             <div class="mb-6 md:mb-0">
                 <a href="{{ url('/') }}" class="flex items-center">
-                    <x-application-logo class="h-7 me-3" />
-                    <span class="self-center text-2xl font-semibold whitespace-nowrap text-gray-900 dark:text-white">
-                        YourApp
-                    </span>
+                    MyApp
                 </a>
             </div>
 

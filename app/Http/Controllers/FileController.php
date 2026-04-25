@@ -10,11 +10,32 @@ use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
-    public function index(){
-        $files = File::where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
-        return view('dashboard', ['files' => $files]);
+public function index(Request $request)
+    {
+        $query = File::where('user_id', Auth::id());
+
+        if ($request->search) {
+            $query->where('original_name', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+
+        // SORT (only ONE active order)
+        if ($request->sort == 'oldest') {
+            $query->orderBy('created_at', 'asc');
+        } elseif ($request->sort == 'largest') {
+            $query->orderBy('file_size', 'desc');
+        } elseif ($request->sort == 'smallest') {
+            $query->orderBy('file_size', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc'); // default newest
+        }
+
+        $files = $query->paginate(5);
+
+        return view('dashboard', compact('files'));
     }
 
     public function upload(){
@@ -23,13 +44,22 @@ class FileController extends Controller
 
     public function show($token){
         $file = File::where('token', $token)->firstOrFail();
+
+        if ($file->expires_at && now()->greaterThan($file->expires_at)) {
+            abort(404);
+        }
+
         return view('files/file', ['file' => $file]);
     }
 
     public function store(Request $request){
         $request->validate([
             'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
+            'expires_in' => 'required|integer|in:1,7,30',
         ]);
+
+        $days = (int) $request->expires_in ?? 7;
+
         
         $file = $request->file('file');
 
@@ -45,6 +75,7 @@ class FileController extends Controller
             'file_path' => $path,
             'file_size' => $file->getSize(),
             'token' => Str::random(20),
+            'expires_at' => now()->addDay($days),
         ]);
 
         return back()->with('link', url('/file/' . $model->token));
@@ -53,8 +84,12 @@ class FileController extends Controller
     public function download($token)
     {
         $file = File::where('token', $token)->firstOrFail();
-        // dd($file->file_path);
-        return Storage::disk('local')->download($file->file_path);
+    
+        if ($file->expires_at && now()->greaterThan($file->expires_at)) {
+                abort(404);
+            }
+
+        return Storage::disk('local')->download($file->file_path, $file->original_name);
     }
 
     public function destroy($id){

@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class File extends Model
 {
+    protected $casts = [
+        'expires_at' => 'datetime',
+    ];
     
     protected $guarded = [];
 

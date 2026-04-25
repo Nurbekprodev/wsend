@@ -40,7 +40,7 @@
             {{ $slot }}
         </main>
 
-        @include('layouts.footer')
+        <x-footer />
 
     </div>
 

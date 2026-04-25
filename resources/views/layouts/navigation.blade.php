@@ -2,8 +2,8 @@
     <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
 
         <!-- Logo -->
-        <a href="{{ url('/') }}" class="flex items-center">
-            <x-application-logo class="mr-3 h-6 sm:h-9 w-auto" />
+        <a href="{{ url('/') }}" class="flex items-center w-9 h-9 hover:opacity-90 transition">
+           MyApp
         </a>
 
         <!-- Right side -->

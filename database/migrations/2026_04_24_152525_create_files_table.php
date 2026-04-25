@@ -9,6 +9,10 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+    protected $casts = [
+        'expires_at' => 'datetime',
+    ];
+
     public function up(): void
     {
     Schema::create('files', function (Blueprint $table) {
@@ -18,6 +22,7 @@ return new class extends Migration
         $table->string('file_path');
         $table->bigInteger('file_size');
         $table->string('token')->unique();
+        $table->timestamp('expires_at')->nullable();
         $table->timestamps();
     });
     }
