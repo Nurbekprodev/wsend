@@ -24,6 +24,9 @@ return new class extends Migration
         $table->string('token')->unique();
         $table->timestamp('expires_at')->nullable();
         $table->timestamps();
+        $table->integer('downloads')->default(0);
+        $table->integer('max_downloads')->nullable();
+        $table->string('password')->nullable();
     });
     }
 

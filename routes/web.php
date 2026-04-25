@@ -16,6 +16,9 @@ Route::post('/upload', [FileController::class, 'store'])->middleware('auth');
 
 // share & download file
 Route::get('/file/{token}', [FileController::class, 'show']);
+
+Route::post('file/{token}', [FileController::class, 'unlock']);
+
 Route::get('/download/{token}', [FileController::class, 'download']);
 
 // delete file

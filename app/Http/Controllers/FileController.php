@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class FileController extends Controller
 {
@@ -49,37 +51,58 @@ public function index(Request $request)
             abort(404);
         }
 
+        if($file->password){
+            return view('files.password', compact('file'));
+        }
+
         return view('files/file', ['file' => $file]);
     }
 
-    public function store(Request $request){
-        $request->validate([
-            'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
-            'expires_in' => 'required|integer|in:1,7,30',
-        ]);
+    // Unlock
+    public function unlock(Request $request, $token){
+        $file = File::where('token', $token)->firstOrFail();
 
-        $days = (int) $request->expires_in ?? 7;
-
-        
-        $file = $request->file('file');
-
-        $path = $file->store('files', 'local');
-
-        if (!$path) {
-            throw new \Exception("File upload failed");
+        if(!Hash::check($request->password, $file->password)){
+            return back()->with(['password' => 'Wrong password']);
         }
 
-        $model = File::create([
-            'user_id' => Auth::id(),
-            'original_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_size' => $file->getSize(),
-            'token' => Str::random(20),
-            'expires_at' => now()->addDay($days),
-        ]);
-
-        return back()->with('link', url('/file/' . $model->token));
+        return view('files.file', compact('file'));
     }
+
+
+
+public function store(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
+        'expires_in' => 'required|integer|in:1,7,30',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    $days = (int) $request->expires_in;
+
+    $file = $request->file('file');
+    $path = $file->store('files', 'local');
+
+    $model = File::create([
+        'user_id' => Auth::id(),
+        'original_name' => $file->getClientOriginalName(),
+        'file_path' => $path,
+        'file_size' => $file->getSize(),
+        'token' => Str::random(20),
+        'expires_at' => now()->addDays($days),
+        'password' => $request->password ? bcrypt($request->password) : null,
+    ]);
+
+    return response()->json([
+        'url' => url('/file/' . $model->token)
+    ]);
+}
 
     public function download($token)
     {
@@ -88,6 +111,12 @@ public function index(Request $request)
         if ($file->expires_at && now()->greaterThan($file->expires_at)) {
                 abort(404);
             }
+
+        $file->increment('downloads');
+
+        if($file->max_downloads && $file->downloads >= $file->max_downloads){
+            abort(403, 'Download limit reached');
+        }
 
         return Storage::disk('local')->download($file->file_path, $file->original_name);
     }

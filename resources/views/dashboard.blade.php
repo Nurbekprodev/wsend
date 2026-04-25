@@ -96,6 +96,7 @@
                         <th class="px-6 py-3">Size</th>
                         <th class="px-6 py-3">Created</th>
                         <th class="px-6 py-3">Expires</th>
+                        <th class="px-6 py-3">Downloads</th>
                         <th class="px-6 py-3">Share</th>
                         <th class="px-6 py-3">Download</th>
                         <th class="px-6 py-3 text-right">Action</th>
@@ -126,6 +127,11 @@
                         <!-- Expires -->
                         <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                             {{ $file->expires_at ? $file->expires_at->format('d M Y') : 'Never' }}
+                        </td>
+
+                        <!-- download counter -->
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                            {{ $file->downloads ?? 0 }}
                         </td>
 
                         <!-- Share -->
