@@ -41,10 +41,10 @@
     </div>
 
     {{-- Desktop --}}
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+    <div class="hidden sm:flex-1 sm:flex sm:flex-col sm:items-center sm:justify-center gap-3">
 
         <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
                 Showing
                 @if ($paginator->firstItem())
                     <span class="font-medium">{{ $paginator->firstItem() }}</span>
@@ -59,7 +59,7 @@
             </p>
         </div>
 
-        <div>
+        <div class="flex justify-center w-full">
             <span class="inline-flex -space-x-px rounded-md shadow-sm">
 
                 {{-- Previous --}}
@@ -73,7 +73,7 @@
                     <a href="{{ $paginator->previousPageUrl() }}" rel="prev"
                     class="px-3 py-2 text-gray-500 bg-white border border-gray-300 
                     rounded-l-lg hover:bg-gray-100 hover:text-primary-700
-                    focus:ring-2 focus:ring-primary-300
+                    focus:outline-none focus:ring-2 focus:ring-primary-300 ring-inset
                     dark:bg-gray-800 dark:border-gray-600 
                     dark:text-gray-300 dark:hover:bg-gray-700">
                         ‹
@@ -106,7 +106,7 @@
                                 <a href="{{ $url }}"
                                 class="px-4 py-2 text-gray-700 bg-white border border-gray-300 
                                 hover:bg-gray-100 hover:text-primary-700
-                                focus:ring-2 focus:ring-primary-300
+                                focus:outline-none focus:ring-2 focus:ring-primary-300 ring-inset
                                 dark:bg-gray-800 dark:border-gray-600 
                                 dark:text-gray-300 dark:hover:bg-gray-700">
                                     {{ $page }}
@@ -123,7 +123,7 @@
                     <a href="{{ $paginator->nextPageUrl() }}" rel="next"
                     class="px-3 py-2 text-gray-500 bg-white border border-gray-300 
                     rounded-r-lg hover:bg-gray-100 hover:text-primary-700
-                    focus:ring-2 focus:ring-primary-300
+                    focus:outline-none focus:ring-2 focus:ring-primary-300 ring-inset
                     dark:bg-gray-800 dark:border-gray-600 
                     dark:text-gray-300 dark:hover:bg-gray-700">
                         ›

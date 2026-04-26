@@ -1,11 +1,13 @@
-<nav x-data="{ open: false }" class=" p-4 sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-800/80">
+<nav x-data="{ open: false }" class="  sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 dark:bg-gray-800/80">
     <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
 
         <!-- Logo -->
-        <a href="{{ url('/') }}" class="flex items-center w-9 h-9 hover:opacity-90 transition">
-           MyApp
+        <a href="{{ url('/') }}" class="flex items-center hover:opacity-90 transition">
+            <img 
+                src="{{ asset('images/logo_img.png') }}" 
+                alt="logo"
+                class="h-16 w-auto">
         </a>
-
         <!-- Right side -->
         <div class="flex items-center lg:order-2">
 

@@ -2,8 +2,11 @@ import './bootstrap';
 import 'flowbite';
 import Alpine from 'alpinejs';
 
+
+
 window.Alpine = Alpine;
 Alpine.start();
+
 
 /* ---------------- CSRF ---------------- */
 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -14,6 +17,7 @@ const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const fileName = document.getElementById('fileName');
 const progressBar = document.getElementById('progressBar');
+const progressContainer = document.getElementById('progressContainer');
 const status = document.getElementById('status');
 
 /* ---------------- Click to select file ---------------- */
@@ -61,6 +65,12 @@ form.addEventListener('submit', function (e) {
 
     status.innerHTML = "";
 
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Uploading...";
+
+    progressContainer.classList.remove('hidden');
+
     const formData = new FormData(form);
 
     const xhr = new XMLHttpRequest();
@@ -71,29 +81,40 @@ form.addEventListener('submit', function (e) {
     /* ---------------- Progress ---------------- */
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
-            let percent = Math.round((e.loaded / e.total) * 100);
+            const percent = Math.round((e.loaded / e.total) * 100);
             progressBar.style.width = percent + '%';
             progressBar.innerText = percent + '%';
         }
     };
 
     /* ---------------- Response ---------------- */
-    const resultBox = document.getElementById('resultBox');
-    const fileLinkInput = document.getElementById('fileLink');
-    const copyBtn = document.getElementById('copyBtn');
-
-    
-
     xhr.onload = function () {
 
-        // not logged in → redirect
-        if (xhr.status === 401 || xhr.responseURL.includes('/login')) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Upload & Get Link";
+
+        let res;
+        try {
+            res = JSON.parse(xhr.responseText);
+        } catch (e) {
+            status.innerHTML = "<span class='text-red-600'>Server error</span>";
+            return;
+        }
+
+        // unauthenticated
+        if (xhr.status === 401) {
             window.location.href = "/login";
             return;
         }
+
+        // too many requests
+        if (xhr.status === 429) {
+            status.innerHTML = "<span class='text-red-600'>Too many uploads. Try again later.</span>";
+            return;
+        }
+
         // validation errors
         if (xhr.status === 422) {
-            let res = JSON.parse(xhr.responseText);
             status.innerHTML =
                 "<span class='text-red-600'>" +
                 Object.values(res.errors).flat().join("<br>") +
@@ -104,7 +125,9 @@ form.addEventListener('submit', function (e) {
         // success
         if (xhr.status === 200) {
 
-            let res = JSON.parse(xhr.responseText);
+            const resultBox = document.getElementById('resultBox');
+            const fileLinkInput = document.getElementById('fileLink');
+            const copyBtn = document.getElementById('copyBtn');
 
             resultBox.classList.remove('hidden');
             fileLinkInput.value = res.url;
@@ -119,8 +142,11 @@ form.addEventListener('submit', function (e) {
 
             fileInput.value = '';
             fileName.textContent = '';
+
             progressBar.style.width = '0%';
             progressBar.innerText = '0%';
+
+            progressContainer.classList.add('hidden');
 
             status.innerHTML = '';
             return;
@@ -130,6 +156,8 @@ form.addEventListener('submit', function (e) {
     };
 
     xhr.onerror = function () {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Upload & Get Link";
         status.innerHTML = "<span class='text-red-600'>Network error</span>";
     };
 

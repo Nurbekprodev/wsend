@@ -12,14 +12,17 @@ Route::get('/dashboard', [FileController::class, 'index'])->middleware(['auth', 
 
 // upload
 Route::get('/upload', [FileController::class, 'upload']);
-Route::post('/upload', [FileController::class, 'store'])->middleware('auth');
+Route::post('/upload', [FileController::class, 'store'])
+    ->middleware('auth')
+    ->middleware('throttle:10,1'); // rate limit (10 uploads per minut per IP)
 
 // share & download file
 Route::get('/file/{token}', [FileController::class, 'show']);
 
 Route::post('file/{token}', [FileController::class, 'unlock']);
 
-Route::get('/download/{token}', [FileController::class, 'download']);
+Route::get('/download/{token}', [FileController::class, 'download'])
+    ->middleware('throttle:50,1'); // rate limit (50 downloads per minut per IP)
 
 // delete file
 Route::delete('/file/{id}', [FileController::class, 'destroy']);
@@ -32,7 +35,7 @@ Route::middleware('auth')->group(function () {
 
 
 Route::get('/test', function (){
-    return  view('welcome');
+    return  view('test');
 });
 
 

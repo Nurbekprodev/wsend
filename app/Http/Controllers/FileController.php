@@ -44,31 +44,36 @@ public function index(Request $request)
         return view('files.upload');
     }
 
-    public function show($token){
-        $file = File::where('token', $token)->firstOrFail();
+    public function show($token)
+    {
+        $file = File::where('token', $token)->first();
+
+        if (!$file) {
+            return response()->view('files.errors.not-found', [], 404);
+        }
 
         if ($file->expires_at && now()->greaterThan($file->expires_at)) {
-            abort(404);
+            return response()->view('files.errors.expired', compact('file'), 410);
         }
 
-        if($file->password){
+        if ($file->password) {
             return view('files.password', compact('file'));
-        }
-
-        return view('files/file', ['file' => $file]);
-    }
-
-    // Unlock
-    public function unlock(Request $request, $token){
-        $file = File::where('token', $token)->firstOrFail();
-
-        if(!Hash::check($request->password, $file->password)){
-            return back()->with(['password' => 'Wrong password']);
         }
 
         return view('files.file', compact('file'));
     }
 
+    // Unlock
+    public function unlock(Request $request, $token)
+    {
+        $file = File::where('token', $token)->firstOrFail();
+
+        if (!Hash::check($request->password, $file->password)) {
+            return back()->with('password', 'Wrong password');
+        }
+
+        return view('files.file', compact('file'));
+    }
 
 
     public function store(Request $request)
@@ -79,9 +84,12 @@ public function index(Request $request)
             ], 401);
         }
 
+
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
+            // strict MIME validation
+            'file' => 'required|file|mimetypes:image/jpeg,image/png,application/pdf,application/zip,text/plain|max:10240',
             'expires_in' => 'required|integer|in:1,7,30',
+            'max_downloads' => 'nullable|integer|min:1|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -91,7 +99,7 @@ public function index(Request $request)
         }
 
         $days = (int) $request->expires_in;
-
+        $max_downloads = $request->max_downloads ?: null;
         $file = $request->file('file');
         $path = $file->store('files', 'local');
 
@@ -100,8 +108,10 @@ public function index(Request $request)
             'original_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'file_size' => $file->getSize(),
-            'token' => Str::random(20),
+            // to prevent token brute-force
+            'token' => Str::random(40),  
             'expires_at' => now()->addDays($days),
+            'max_downloads' => $max_downloads,
             'password' => $request->password ? bcrypt($request->password) : null,
         ]);
 
@@ -112,17 +122,21 @@ public function index(Request $request)
 
     public function download($token)
     {
-        $file = File::where('token', $token)->firstOrFail();
-    
+        $file = File::where('token', $token)->first();
+
+        if (!$file) {
+            return response()->view('files.errors.not-found', [], 404);
+        }
+
         if ($file->expires_at && now()->greaterThan($file->expires_at)) {
-                abort(404);
-            }
+            return response()->view('files.errors.expired', compact('file'), 410);
+        }
+
+        if ($file->max_downloads && $file->downloads >= $file->max_downloads) {
+            return response()->view('files.errors.limit-reached', compact('file'), 403);
+        }
 
         $file->increment('downloads');
-
-        if($file->max_downloads && $file->downloads >= $file->max_downloads){
-            abort(403, 'Download limit reached');
-        }
 
         return Storage::disk('local')->download($file->file_path, $file->original_name);
     }
@@ -131,7 +145,7 @@ public function index(Request $request)
         $file = File::where('id', $id)
            ->where('user_id', auth()->id())
            ->firstOrFail();
-        // dd($file->file_path);
+      
         Storage::disk('local')->delete($file->file_path);
 
 

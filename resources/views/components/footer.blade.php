@@ -4,9 +4,13 @@
 
         <div class="md:flex md:justify-between">
             <div class="mb-6 md:mb-0">
-                <a href="{{ url('/') }}" class="flex items-center">
-                    MyApp
-                </a>
+            <!-- Logo -->
+            <a href="{{ url('/') }}" class="flex items-center hover:opacity-90 transition">
+                <img 
+                    src="{{ asset('images/logo_img.png') }}" 
+                    alt="logo"
+                    class="h-20 w-auto">
+            </a>
             </div>
 
             <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">

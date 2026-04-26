@@ -194,7 +194,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-6">
+        <div class="mt-8">
             {{ $files->links() }}
         </div>
 

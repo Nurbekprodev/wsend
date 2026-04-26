@@ -25,10 +25,17 @@ class DeleteExpiredFiles extends Command
     /**
      * Execute the console command.
      */
+    
     public function handle()
     {
-        $files = File::whereNotNull('expires_at')
-            ->where('expires_at', '<', now())
+        $files = File::where(function ($q) {
+                $q->whereNotNull('expires_at')
+                ->where('expires_at', '<', now());
+            })
+            ->orWhere(function ($q) {
+                $q->whereNotNull('max_downloads')
+                ->whereColumn('downloads', '>=', 'max_downloads');
+            })
             ->get();
 
         foreach ($files as $file) {
@@ -36,6 +43,6 @@ class DeleteExpiredFiles extends Command
             $file->delete();
         }
 
-        $this->info('Expired files deleted');
+        $this->info('Expired and maxed files deleted');
     }
 }

@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- Status -->
-                    <div id="status" class="text-sm"></div>
+                    <div id="status" class="text-sm text-red-500"></div>
 
                     <!-- Expiry -->
                     <div>
@@ -72,6 +72,19 @@
                         <input type="password"
                             name="password"
                             placeholder="Set a password"
+                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
+                                focus:ring-primary-500 focus:border-primary-500
+                                dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            Max downloads (optional)
+                        </label>
+
+                        <input type="number"
+                            name="max_downloads"
+                            placeholder="Set max downloads"
                             class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
                                 focus:ring-primary-500 focus:border-primary-500
                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
