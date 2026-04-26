@@ -65,7 +65,7 @@ form.addEventListener('submit', function (e) {
 
     const xhr = new XMLHttpRequest();
 
-    xhr.open('POST', '/upload', true);
+    xhr.open('POST', form.action, true);
     xhr.setRequestHeader('X-CSRF-TOKEN', token);
 
     /* ---------------- Progress ---------------- */
@@ -82,56 +82,52 @@ form.addEventListener('submit', function (e) {
     const fileLinkInput = document.getElementById('fileLink');
     const copyBtn = document.getElementById('copyBtn');
 
-xhr.onload = function () {
+    
 
-    // Laravel validation error
-    if (xhr.status === 422) {
-        let res = JSON.parse(xhr.responseText);
+    xhr.onload = function () {
 
-        let msg = '';
+        // not logged in → redirect
+        if (xhr.status === 401 || xhr.responseURL.includes('/login')) {
+            window.location.href = "/login";
+            return;
+        }
+        // validation errors
+        if (xhr.status === 422) {
+            let res = JSON.parse(xhr.responseText);
+            status.innerHTML =
+                "<span class='text-red-600'>" +
+                Object.values(res.errors).flat().join("<br>") +
+                "</span>";
+            return;
+        }
 
-        Object.keys(res.errors).forEach(key => {
-            msg += res.errors[key][0] + '<br>';
-        });
+        // success
+        if (xhr.status === 200) {
 
-        status.innerHTML = `
-            <div class="text-red-600">
-                ${msg}
-            </div>
-        `;
+            let res = JSON.parse(xhr.responseText);
 
-        return;
-    }
+            resultBox.classList.remove('hidden');
+            fileLinkInput.value = res.url;
 
-    // success
-    if (xhr.status === 200) {
+            copyBtn.innerText = "Copy";
 
-        let res = JSON.parse(xhr.responseText);
+            copyBtn.onclick = function () {
+                navigator.clipboard.writeText(fileLinkInput.value);
+                this.innerText = "Copied!";
+                setTimeout(() => this.innerText = "Copy", 1500);
+            };
 
-        resultBox.classList.remove('hidden');
-        fileLinkInput.value = res.url;
+            fileInput.value = '';
+            fileName.textContent = '';
+            progressBar.style.width = '0%';
+            progressBar.innerText = '0%';
 
-        copyBtn.innerText = "Copy";
+            status.innerHTML = '';
+            return;
+        }
 
-        copyBtn.onclick = function () {
-            navigator.clipboard.writeText(fileLinkInput.value);
-            this.innerText = "Copied!";
-            setTimeout(() => this.innerText = "Copy", 1500);
-        };
-
-        // reset UI
-        fileInput.value = '';
-        fileName.textContent = '';
-        progressBar.style.width = '0%';
-        progressBar.innerText = '0%';
-
-        status.innerHTML = '';
-    }
-
-    else {
         status.innerHTML = "<span class='text-red-600'>Upload failed!</span>";
-    }
-};
+    };
 
     xhr.onerror = function () {
         status.innerHTML = "<span class='text-red-600'>Network error</span>";

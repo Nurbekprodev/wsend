@@ -89,22 +89,22 @@
                     <div id="status" class="text-sm"></div>
 
                     <!-- Result Box (hidden by default) -->
-<div id="resultBox" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-    
-    <p class="text-green-600 font-medium">Upload complete</p>
+                    <div id="resultBox" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                        
+                        <p class="text-green-600 font-medium">Upload complete</p>
 
-    <div class="flex gap-2 mt-3">
-        <input id="fileLink"
-               class="w-full p-2 border rounded text-sm bg-white dark:bg-gray-700"
-               readonly>
+                        <div class="flex gap-2 mt-3">
+                            <input id="fileLink"
+                                class="w-full p-2 border rounded text-sm bg-white dark:bg-gray-700"
+                                readonly>
 
-        <button id="copyBtn"
-                type="button"
-                class="px-3 py-2 bg-gray-900 text-white rounded text-sm">
-            Copy
-        </button>
-    </div>
-</div>
+                            <button id="copyBtn"
+                                    type="button"
+                                    class="px-3 py-2 bg-gray-900 text-white rounded text-sm">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
                 </form>
 
                     {{-- Errors --}}

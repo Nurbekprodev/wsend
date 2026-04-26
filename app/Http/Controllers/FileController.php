@@ -71,38 +71,44 @@ public function index(Request $request)
 
 
 
-public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
-        'expires_in' => 'required|integer|in:1,7,30',
-    ]);
+    public function store(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
 
-    if ($validator->fails()) {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:jpg,png,pdf,zip,txt|max:10240',
+            'expires_in' => 'required|integer|in:1,7,30',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $days = (int) $request->expires_in;
+
+        $file = $request->file('file');
+        $path = $file->store('files', 'local');
+
+        $model = File::create([
+            'user_id' => Auth::id(),
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'file_size' => $file->getSize(),
+            'token' => Str::random(20),
+            'expires_at' => now()->addDays($days),
+            'password' => $request->password ? bcrypt($request->password) : null,
+        ]);
+
         return response()->json([
-            'errors' => $validator->errors()
-        ], 422);
+            'url' => url('/file/' . $model->token)
+        ]);
     }
-
-    $days = (int) $request->expires_in;
-
-    $file = $request->file('file');
-    $path = $file->store('files', 'local');
-
-    $model = File::create([
-        'user_id' => Auth::id(),
-        'original_name' => $file->getClientOriginalName(),
-        'file_path' => $path,
-        'file_size' => $file->getSize(),
-        'token' => Str::random(20),
-        'expires_at' => now()->addDays($days),
-        'password' => $request->password ? bcrypt($request->password) : null,
-    ]);
-
-    return response()->json([
-        'url' => url('/file/' . $model->token)
-    ]);
-}
 
     public function download($token)
     {
