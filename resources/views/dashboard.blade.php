@@ -9,33 +9,37 @@
         </h1>
 
         <!-- Search + Filters -->
-        <form method="GET" class="mb-6">
+<form method="GET" class="mb-6">
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+    <div class="relative bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg p-4">
 
-                <!-- Search -->
-                <div class="md:col-span-2 relative">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                        </svg>
-                    </div>
+        <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-3 md:space-y-0">
 
-                    <input
-                        type="text"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Search your files..."
-                        class="block w-full p-3 pl-10 text-sm border rounded-lg bg-gray-50 border-gray-300
-                        dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                    >
+            <!-- Search -->
+            <div class="w-full md:w-1/2 relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
                 </div>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Search your files..."
+                    class="w-full p-2.5 pl-10 text-sm border rounded-lg bg-gray-50 border-gray-300
+                    dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            </div>
+
+            <!-- Filters row -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-1/2">
 
                 <!-- Type -->
                 <select name="type"
-                    class="p-3 text-sm border rounded-lg bg-gray-50 border-gray-300
-                    dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    class="w-full p-2.5 text-sm border rounded-lg bg-gray-50 border-gray-300
+                    dark:bg-gray-700 dark:border-gray-600 dark:text-white">
 
                     <option value="">All files</option>
                     <option value="image" {{ request('type')=='image'?'selected':'' }}>Images</option>
@@ -47,8 +51,8 @@
 
                 <!-- Sort -->
                 <select name="sort"
-                    class="p-3 text-sm border rounded-lg bg-gray-50 border-gray-300
-                    dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                    class="w-full p-2.5 text-sm border rounded-lg bg-gray-50 border-gray-300
+                    dark:bg-gray-700 dark:border-gray-600 dark:text-white">
 
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
@@ -60,7 +64,7 @@
             </div>
 
             <!-- Buttons -->
-            <div class="flex gap-2 mt-3">
+            <div class="flex gap-2 md:ml-auto">
 
                 <button type="submit"
                     class="px-4 py-2 text-sm font-medium text-white bg-primary-700 rounded-lg hover:bg-primary-800">
@@ -75,7 +79,11 @@
 
             </div>
 
-        </form>
+        </div>
+
+    </div>
+
+</form>
 
         <!-- Success -->
         @if(session('success'))
