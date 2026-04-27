@@ -1,4 +1,4 @@
-<div class="my-10 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-700"></div>
+
 <footer class="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
     <div class="mx-auto w-full max-w-screen-xl p-6 lg:py-8">
 
