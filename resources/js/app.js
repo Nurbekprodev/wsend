@@ -58,10 +58,33 @@ form.addEventListener('submit', function (e) {
 
     const file = fileInput.files[0];
 
+    // clien-side validation before upload
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf",
+        "application/zip",
+        "application/x-zip-compressed",
+        "application/octet-stream",
+        "text/plain"
+    ];
+
     if (!file) {
         status.innerHTML = "<span class='text-red-600'>Please select a file</span>";
         return;
     }
+
+
+    if (!allowedTypes.includes(file.type)) {
+        status.innerHTML = "Invalid file type";
+        return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+        status.innerHTML = "File too large (max 10MB)";
+        return;
+    }
+
 
     status.innerHTML = "";
 

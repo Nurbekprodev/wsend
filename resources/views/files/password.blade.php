@@ -32,22 +32,17 @@
             <form method="POST" class="mt-5 space-y-4">
                 @csrf
 
-                <input 
+                <x-input 
                     type="password"
                     name="password"
                     placeholder="Enter password"
-                    class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
-                        focus:ring-primary-500 focus:border-primary-500
-                        dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    />
 
-                <button 
+                <x-button-primary 
                     type="submit"
-                    class="w-full text-white bg-primary-700 hover:bg-primary-800 
-                        focus:ring-4 focus:ring-primary-300 font-medium rounded-lg 
-                        text-sm px-5 py-2.5 
-                        dark:bg-primary-600 dark:hover:bg-primary-700">
+                    class="w-full">
                     Unlock file
-                </button>
+                </x-button-primary>
             </form>
 
         </div>

@@ -76,14 +76,11 @@
                 </div>
 
                 <!-- Download button -->
-                <a href="/download/{{ $file->token }}"
-                    class="mt-6 inline-flex items-center justify-center w-full text-white 
-                            bg-primary-700 hover:bg-primary-800 focus:ring-4 
-                            focus:ring-primary-300 font-medium rounded-lg 
-                            text-sm px-5 py-2.5 
-                            dark:bg-primary-600 dark:hover:bg-primary-700">
+                <x-button-primary 
+                    href="/download/{{ $file->token }}"
+                    class="mt-6  w-full">
                     Download file
-                </a>
+                </x-button-primary>
 
             </div>
 
