@@ -87,6 +87,7 @@ form.addEventListener('submit', function (e) {
         }
     };
 
+
     /* ---------------- Response ---------------- */
     xhr.onload = function () {
 
@@ -163,3 +164,4 @@ form.addEventListener('submit', function (e) {
 
     xhr.send(formData);
 });
+

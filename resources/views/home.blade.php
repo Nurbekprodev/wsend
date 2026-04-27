@@ -23,15 +23,13 @@
             <!-- CTA -->
             <div class="mt-8 flex flex-col sm:flex-row gap-3">
 
-                <a href="/upload"
-                   class="inline-flex items-center justify-center px-6 py-3 text-white bg-primary-700 hover:bg-primary-800 rounded-lg font-medium focus:ring-4 focus:ring-primary-300">
+                <x-button-primary href="/upload" class="py-5 px-3">
                     Upload File
-                </a>
+                </x-button-primary>
 
-                <a href="/dashboard"
-                   class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-900 dark:text-white dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <x-button-secondary href="/dashboard" class="py-5 px-3">
                     View Dashboard
-                </a>
+                </x-button-secondary>
 
             </div>
         </div>
@@ -202,15 +200,13 @@
 
             <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
 
-                <a href="/upload"
-                   class="px-6 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800">
+                <x-button-primary href="/upload"  class="py-5 px-3">
                     Upload File
-                </a>
+                </x-button-primary>
 
-                <a href="/login"
-                   class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <x-button-secondary href="/login"  class="py-5 px-3">
                     Login / Register
-                </a>
+                </x-button-secondary>
 
             </div>
 

@@ -40,17 +40,17 @@
             <div class="space-y-2">
 
                 @isset($action)
-                    <a href="{{ $action['url'] }}"
-                       class="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-white bg-primary-700 hover:bg-primary-800 rounded-lg">
+                    <x-button-primary href="{{ $action['url'] }}"
+                       class="inline-flex items-center justify-center w-full px-5 py-2.5" >
                         {{ $action['text'] }}
-                    </a>
+                    </x-button-primary>
                 @endisset
 
                 @isset($support)
-                    <a href="{{ $support }}"
-                       class="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 rounded-lg">
+                    <x-button-primary href="{{ $support }}"
+                       class="inline-flex items-center justify-center w-full px-5 py-2.5">
                         Contact support
-                    </a>
+                    </x-button-primary>
                 @endisset
 
             </div>

@@ -23,7 +23,8 @@
                     <div id="dropZone"
                         class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-500 transition">
 
-                        <input type="file" name="file" id="fileInput" class="hidden">
+                        <x-input type="file" name="file" id="fileInput" class="hidden" 
+                        />
 
                         <div class="text-gray-600 dark:text-gray-300">
                             <p class="text-sm font-medium">Drag & drop your file here</p>
@@ -49,10 +50,10 @@
 
                     <!-- Expiry -->
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <x-label >
                             Link expires after
-                        </label>
-
+                        </x-label>
+   
                         <select name="expires_in"
                             class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
                                 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -65,38 +66,34 @@
 
                     <!-- Password -->
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <x-label >
                             Password (optional)
-                        </label>
+                        </x-label>
 
-                        <input type="password"
+                        <x-input 
+                            type="password"
                             name="password"
-                            placeholder="Set a password"
-                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
-                                focus:ring-primary-500 focus:border-primary-500
-                                dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            placeholder="Set a password" 
+                        />
                     </div>
 
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <x-label >
                             Max downloads (optional)
-                        </label>
+                        </x-label>
 
-                        <input type="number"
+                        <x-input type="number"
                             name="max_downloads"
-                            placeholder="Set max downloads"
-                            class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
-                                focus:ring-primary-500 focus:border-primary-500
-                                dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            placeholder="Set max downloads" 
+                        />
                     </div>
 
                     <!-- Submit -->
-                    <button type="submit"
+                    <x-button-primary type="submit"
                         id="uploadBtn"
-                        class="w-full text-white bg-primary-700 hover:bg-primary-800 
-                            font-medium rounded-lg text-sm px-5 py-2.5">
+                        class="w-full">
                         Upload & Get Link
-                    </button>
+                    </x-button-primary>
 
                     <!-- Status / Result -->
                     <div id="status" class="text-sm"></div>
@@ -106,16 +103,19 @@
                         
                         <p class="text-green-600 font-medium">Upload complete</p>
 
-                        <div class="flex gap-2 mt-3">
-                            <input id="fileLink"
-                                class="w-full p-2 border rounded text-sm bg-white dark:bg-gray-700"
-                                readonly>
+                        <div class="flex gap-2">
+                            <x-input 
+                                id="fileLink"
+                                type="text"
+                                readonly
+                                class="flex-1"
+                            />
 
-                            <button id="copyBtn"
-                                    type="button"
-                                    class="px-3 py-2 bg-gray-900 text-white rounded text-sm">
+                            <x-button-primary 
+                                id="copyBtn"
+                                type="button">
                                 Copy
-                            </button>
+                            </x-button-primary>
                         </div>
                     </div>
                 </form>
@@ -136,44 +136,36 @@
                         </div>
                     @endif
 
-                    {{-- Download Link --}}
+                    <!-- {{-- Download Link --}}
                     @if (session('link'))
-                        <div class="mt-4">
-                            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                Share link
-                            </label>
+                    <div class="mt-4">
+                        <x-label>
+                            Share link
+                        </x-label>
 
-                            <div class="flex">
-                                <input 
-                                    id="share-link"
-                                    type="text" 
-                                    value="{{ session('link') }}"
-                                    readonly
-                                    class="flex-1 p-2.5 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-l-lg
-                                        dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <div class="flex gap-2">
+                            <input 
+                                id="share-link"
+                                type="text" 
+                                value="{{ session('link') }}"
+                                readonly 
+                                class="w-full p-2.5 text-sm 
+                                        border border-gray-300 
+                                        rounded-lg 
+                                        bg-gray-50 
+                                        focus:ring-primary-500 
+                                        focus:border-primary-500
+                                        dark:bg-gray-700 
+                                        dark:border-gray-600 
+                                        dark:text-white"
+                            />
 
-                            <button 
-                                onclick="
-                                    navigator.clipboard.writeText(document.getElementById('share-link').value);
-                                    const btn = this;
-                                    const original = btn.innerText;
-                                    btn.innerText = 'Copied!';
-                                    btn.classList.add('bg-green-600');
-                                    btn.classList.remove('bg-primary-700', 'bg-primary-800');
-
-                                    setTimeout(() => {
-                                        btn.innerText = original;
-                                        btn.classList.remove('bg-green-600');
-                                        btn.classList.add('bg-primary-700');
-                                    }, 1500);
-                                "
-                                class="px-4 py-2.5 text-sm font-medium text-white bg-primary-700 rounded-r-lg
-                                    hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700">
+                            <x-button-primary type="button" onclick="copyLink()">
                                 Copy
-                            </button>
-                            </div>
+                            </x-button-primary>
                         </div>
-                    @endif
+                    </div>
+                    @endif -->
 
                     <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
                         Files are automatically deleted after some time.

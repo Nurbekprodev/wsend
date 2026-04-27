@@ -66,16 +66,13 @@
             <!-- Buttons -->
             <div class="flex gap-2 md:ml-auto">
 
-                <button type="submit"
-                    class="px-4 py-2 text-sm font-medium text-white bg-primary-700 rounded-lg hover:bg-primary-800">
+                <x-button-primary type="submit" >
                     Apply
-                </button>
+                </x-button-primary>
 
-                <a href="{{ url()->current() }}"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100
-                    dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                <x-button-secondary href="{{ url()->current() }}">
                     Reset
-                </a>
+                </x-button-secondary>
 
             </div>
 
@@ -144,24 +141,24 @@
 
                         <!-- Share -->
                         <td class="px-6 py-4">
-                            <button
+                            <x-button-primary
                                 onclick="
                                     navigator.clipboard.writeText('{{ url('/file/'.$file->token) }}');
                                     const btn = this;
                                     btn.innerText = 'Copied!';
                                     setTimeout(() => btn.innerText = 'Copy', 1500);
                                 "
-                                class="text-white bg-primary-700 hover:bg-primary-800 px-3 py-2 rounded-lg text-xs">
+                                class="px-3 py-2"
+                                type="button">
                                 Copy
-                            </button>
+                            </x-button-primary>
                         </td>
 
                         <!-- Download -->
                         <td class="px-6 py-4">
-                            <a href="/file/{{ $file->token }}"
-                               class="text-white bg-gray-700 hover:bg-gray-800 px-3 py-2 rounded-lg text-xs">
-                                Download
-                            </a>
+                            <x-button-secondary href="/file/{{ $file->token }}">
+                               Download
+                            </x-button-secondary>
                         </td>
 
                         <!-- Delete -->
