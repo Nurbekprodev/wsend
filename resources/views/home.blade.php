@@ -1,8 +1,8 @@
 <x-app-layout>
 
 <!-- HERO -->
-<section class="bg-white dark:bg-gray-900">
-    <div class="max-w-screen-xl px-4 py-20 mx-auto grid lg:grid-cols-12 gap-10 items-center">
+<x-section>
+    <x-container class="grid lg:grid-cols-12 gap-10 items-center">
 
         <!-- Text -->
         <div class="lg:col-span-7">
@@ -41,12 +41,12 @@
                  class="w-full max-w-md hover:scale-105 transition duration-300">
         </div>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 <!-- STATS STRIP -->
-<section class="bg-gray-50 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-800">
-    <div class="max-w-screen-xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 text-center gap-6">
+<x-section >
+    <x-container class="grid grid-cols-2 md:grid-cols-4 text-center gap-6">
 
         <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">10K+</p>
@@ -68,12 +68,12 @@
             <p class="text-sm text-gray-500">Encrypted links</p>
         </div>
 
-    </div>
-</section>
+</x-container>
+</x-section>
 
 <!-- HOW IT WORKS -->
-<section class="bg-white dark:bg-gray-900">
-    <div class="max-w-screen-xl mx-auto px-4 py-20">
+<x-section >
+    <x-container>
 
         <div class="text-center max-w-2xl mx-auto mb-14">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
@@ -112,12 +112,12 @@
 
         </div>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 <!-- FEATURES -->
-<section class="bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-screen-xl mx-auto px-4 py-20">
+<x-section >
+    <x-container >
 
         <div class="max-w-2xl mb-14">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
@@ -162,33 +162,26 @@
 
         </div>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 <!-- UPLOAD CTA (MOVED HERE) -->
-<section class="bg-white dark:bg-gray-900">
-    <div class="max-w-screen-lg mx-auto px-4 py-20 text-center">
+<x-section>
+    <x-container>
 
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Upload your file in seconds
-        </h2>
-
-        <p class="mt-3 text-gray-500">
-            No signup required. Secure, fast, and reliable file sharing.
-        </p>
-
-        <div class="mt-10">
+        <x-card class="p-10 text-center">
+    
             <x-upload-form />
-        </div>
+        </x-card>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 <!-- FINAL CTA -->
-<section class="bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-screen-lg mx-auto px-4 py-20">
+<x-section>
+    <x-container>
 
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-10 text-center shadow-sm">
+        <x-card  class="p-10 text-center">
 
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">
                 Start sharing files securely today
@@ -214,9 +207,9 @@
                 No credit card required • Files expire automatically
             </p>
 
-        </div>
+        </x-card>
 
-    </div>
-</section>
+    </x-container>
+</x-section>
 
 </x-app-layout>

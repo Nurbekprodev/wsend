@@ -1,7 +1,12 @@
 <x-app-layout>
 
-    <div>
-        <x-upload-form/>
-    </div>
+    <x-section>
+        <x-container>
+            
+            <x-upload-form/>
+            
+            
+        </x-container>
+    </x-section>
 
 </x-app-layout>

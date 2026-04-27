@@ -1,12 +1,10 @@
-<div class="bg-white dark:bg-gray-900">
-    <div class="max-w-2xl mx-auto px-4 py-12 text-center">
-
-        <h1 class="mb-3 text-3xl font-bold text-gray-900 dark:text-white">
-            Send files instantly
-        </h1>
-        <p class="mb-6 text-gray-500 dark:text-gray-400">
-            Upload a file and get a secure shareable link. No signup required.
-        </p>
+    <div class="max-w-2xl mx-auto">
+            <h1 class="mb-3 text-3xl font-bold text-gray-900 dark:text-white">
+                Send files instantly
+            </h1>
+            <p class="mb-6 text-gray-500 dark:text-gray-400">
+                Upload a file and get a secure shareable link. No signup required.
+            </p>
         <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 text-left">
         
         <!-- upload form -->
@@ -121,37 +119,9 @@
             </div>
         @endif
 
-        <!-- {{-- Download Link --}}
-        @if (session('link'))
-            <div class="mt-4">
-                <x-label>
-                    Share link
-                </x-label>
-                <div class="flex gap-2">
-                    <input 
-                        id="share-link"
-                        type="text" 
-                        value="{{ session('link') }}"
-                        readonly 
-                        class="w-full p-2.5 text-sm 
-                                border border-gray-300 
-                                rounded-lg 
-                                bg-gray-50 
-                                focus:ring-primary-500 
-                                focus:border-primary-500
-                                dark:bg-gray-700 
-                                dark:border-gray-600 
-                                dark:text-white"
-                    />
-                    <x-button-primary type="button" onclick="copyLink()">
-                        Copy
-                    </x-button-primary>
-                </div>
-            </div>
-        @endif -->
         <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
             Files are automatically deleted after some time.
         </p>
     </div>
- </div>
+
 </div>

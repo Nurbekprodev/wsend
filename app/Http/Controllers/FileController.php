@@ -35,7 +35,7 @@ public function index(Request $request)
             $query->orderBy('created_at', 'desc'); // default newest
         }
 
-        $files = $query->paginate(5);
+        $files = $query->paginate(8);
 
         return view('dashboard', compact('files'));
     }
