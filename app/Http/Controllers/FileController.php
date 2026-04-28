@@ -75,14 +75,20 @@ public function index(Request $request)
         return view('files.file', compact('file'));
     }
 
-
+    // store
     public function store(Request $request)
     {
-        if (!auth()->check()) {
-            return response()->json([
-                'message' => 'Unauthenticated'
-            ], 401);
-        }
+        // if (!auth()->check()) {
+        //     return response()->json([
+        //         'message' => 'Unauthenticated'
+        //     ], 401);
+        // }
+
+        if (!$request->hasFile('file')) {
+        return response()->json([
+            'message' => 'No file uploaded'
+        ], 422);
+}
 
 
         $validator = Validator::make($request->all(), [
@@ -103,13 +109,14 @@ public function index(Request $request)
         $file = $request->file('file');
         $path = $file->store('files', 'local');
 
+
         $model = File::create([
-            'user_id' => Auth::id(),
+            'user_id' => auth()->user() ? auth()->id() : null,
             'original_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'file_size' => $file->getSize(),
             // to prevent token brute-force
-            'token' => Str::random(40),  
+            'token' => Str::random(10),  
             'expires_at' => now()->addDays($days),
             'max_downloads' => $max_downloads,
             'password' => $request->password ? bcrypt($request->password) : null,

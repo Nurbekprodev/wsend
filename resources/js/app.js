@@ -113,9 +113,11 @@ form.addEventListener('submit', function (e) {
 
     /* ---------------- Response ---------------- */
     xhr.onload = function () {
+        //  console.log(xhr.status);
 
         submitBtn.disabled = false;
         submitBtn.innerText = "Upload & Get Link";
+
 
         let res;
         try {
@@ -125,11 +127,7 @@ form.addEventListener('submit', function (e) {
             return;
         }
 
-        // unauthenticated
-        if (xhr.status === 401) {
-            window.location.href = "/login";
-            return;
-        }
+
 
         // too many requests
         if (xhr.status === 429) {

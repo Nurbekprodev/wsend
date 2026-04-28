@@ -82,7 +82,7 @@
                 Upload & Get Link
             </x-button-primary>
 
-
+<input type="file" name="file">
             <!-- Result Box (hidden by default) -->
             <div id="resultBox" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 
