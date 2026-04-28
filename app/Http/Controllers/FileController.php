@@ -78,23 +78,12 @@ public function index(Request $request)
     // store
     public function store(Request $request)
     {
-        // if (!auth()->check()) {
-        //     return response()->json([
-        //         'message' => 'Unauthenticated'
-        //     ], 401);
-        // }
-
-        if (!$request->hasFile('file')) {
-        return response()->json([
-            'message' => 'No file uploaded'
-        ], 422);
-}
-
+       
 
         $validator = Validator::make($request->all(), [
             // strict MIME validation
             'file' => 'required|file|mimetypes:image/jpeg,image/png,application/pdf,application/zip,text/plain|max:10240',
-            'expires_in' => 'required|integer|in:1,7,30',
+            'expires_in' => 'required|integer|in:1,3,7',
             'max_downloads' => 'nullable|integer|min:1|max:100',
         ]);
 

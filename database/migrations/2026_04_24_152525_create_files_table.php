@@ -9,15 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    protected $casts = [
-        'expires_at' => 'datetime',
-    ];
+
 
     public function up(): void
     {
     Schema::create('files', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained()->nullOnDelete();
+        $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
         $table->string('original_name');
         $table->string('file_path');
         $table->bigInteger('file_size');

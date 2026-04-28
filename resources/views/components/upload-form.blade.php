@@ -49,8 +49,8 @@
                     class="w-full p-2.5 text-sm border border-gray-300 rounded-lg bg-gray-50 
                         dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="1">1 day</option>
-                    <option value="7" selected>7 days</option>
-                    <option value="30">30 days</option>
+                    <option value="3" selected>3 days</option>
+                    <option value="7">7 days</option>
                 </select>
             </div>
 
@@ -72,6 +72,7 @@
                 <x-input type="number"
                     name="max_downloads"
                     placeholder="Set max downloads" 
+                    min="1"
                 />
             </div>
 
@@ -82,7 +83,7 @@
                 Upload & Get Link
             </x-button-primary>
 
-<input type="file" name="file">
+
             <!-- Result Box (hidden by default) -->
             <div id="resultBox" class="hidden mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                 
