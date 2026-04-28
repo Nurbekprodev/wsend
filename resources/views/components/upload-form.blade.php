@@ -18,7 +18,12 @@
             <!-- File Drop Zone -->
             <div id="dropZone"
                 class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-primary-500 transition">
-                <x-input type="file" name="file" id="fileInput" class="hidden" 
+                <x-input 
+                    type="file" 
+                    name="files[]" 
+                    multiple 
+                    id="fileInput" 
+                    class="hidden" 
                 />
                 <div class="text-gray-600 dark:text-gray-300">
                     <p class="text-sm font-medium">Drag & drop your file here</p>

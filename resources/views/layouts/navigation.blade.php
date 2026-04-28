@@ -25,15 +25,13 @@
             </button>
 
             @guest
-                <a href="{{ route('login') }}"
-                   class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 mr-2 dark:hover:bg-gray-700">
+                <x-button-secondary href="{{ route('login') }}" class="mx-2">
                     Login
-                </a>
+                </x-button-secondary>
 
-                <a href="{{ route('register') }}"
-                   class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 mr-2 dark:bg-primary-600 dark:hover:bg-primary-700">
+                <x-button-primary href="{{ route('register') }}">
                     Register
-                </a>
+                </x-button-primary>
             @endguest
 
             @auth

@@ -19,7 +19,7 @@ return new class extends Migration
         $table->string('original_name');
         $table->string('file_path');
         $table->bigInteger('file_size');
-        $table->string('token')->unique();
+        $table->string('token');
         $table->timestamp('expires_at')->nullable();
         $table->timestamps();
         $table->integer('downloads')->default(0);

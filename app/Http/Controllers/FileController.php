@@ -78,11 +78,16 @@ public function index(Request $request)
     // store
     public function store(Request $request)
     {
-       
+        // accept files
+        $files = $request->file('files');
+        // one token for all files
+        $token = Str::random(20);
+        $days = (int) $request->expires_in;
+        $max_downloads = $request->max_downloads ?: null;
 
         $validator = Validator::make($request->all(), [
-            // strict MIME validation
-            'file' => 'required|file|mimetypes:image/jpeg,image/png,application/pdf,application/zip,text/plain|max:10240',
+            'files' => 'required|array',
+            'files.*' => 'required|file|mimetypes:image/jpeg,image/png,application/pdf,application/zip,text/plain|max:10240',
             'expires_in' => 'required|integer|in:1,3,7',
             'max_downloads' => 'nullable|integer|min:1|max:100',
         ]);
@@ -93,23 +98,24 @@ public function index(Request $request)
             ], 422);
         }
 
-        $days = (int) $request->expires_in;
-        $max_downloads = $request->max_downloads ?: null;
-        $file = $request->file('file');
-        $path = $file->store('files', 'local');
+
+        foreach($files as $file){
+            $path = $file->store('files', 'local');
+
+            // create file
+            $model = File::create([
+                'user_id' => auth()->user() ? auth()->id() : null,
+                'original_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'file_size' => $file->getSize(),
+                'token' => $token,  
+                'expires_at' => now()->addDays($days),
+                'max_downloads' => $max_downloads,
+                'password' => $request->password ? bcrypt($request->password) : null,
+            ]);
 
 
-        $model = File::create([
-            'user_id' => auth()->user() ? auth()->id() : null,
-            'original_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_size' => $file->getSize(),
-            // to prevent token brute-force
-            'token' => Str::random(10),  
-            'expires_at' => now()->addDays($days),
-            'max_downloads' => $max_downloads,
-            'password' => $request->password ? bcrypt($request->password) : null,
-        ]);
+        }
 
         return response()->json([
             'url' => url('/file/' . $model->token)
@@ -118,24 +124,58 @@ public function index(Request $request)
 
     public function download($token)
     {
-        $file = File::where('token', $token)->first();
+        $files = File::where('token', $token)->get();
+        $tempDir = storage_path('app/temp');
 
-        if (!$file) {
+        if ($files->isEmpty()) {
             return response()->view('files.errors.not-found', [], 404);
         }
 
-        if ($file->expires_at && now()->greaterThan($file->expires_at)) {
-            return response()->view('files.errors.expired', compact('file'), 410);
+        if ($files->count() == 1) {
+
+            $file = $files->first();
+
+            if ($file->expires_at && now()->greaterThan($file->expires_at)) {
+                return response()->view('files.errors.expired', compact('file'), 410);
+            }
+
+            if ($file->max_downloads && $file->downloads >= $file->max_downloads) {
+                return response()->view('files.errors.limit-reached', compact('file'), 403);
+            }
+
+            $file->increment('downloads');
+
+            return Storage::disk('local')->download($file->file_path, $file->original_name);
+        }else {
+
+            $zipName = Str::random(20) . '.zip';
+            $tempDir = storage_path('app/temp');
+            $zipPath = $tempDir . '/' . $zipName;
+
+            if (!file_exists($tempDir)) {
+                mkdir($tempDir, 0777, true);
+            }
+
+            $zip = new \ZipArchive();
+
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
+                abort(500, 'ZIP creation failed');
+            }
+
+            foreach ($files as $file) {
+
+                $fullPath = Storage::disk('local')->path($file->file_path);
+
+                if (file_exists($fullPath)) {
+                    $zip->addFile($fullPath, $file->original_name);
+                }
+            }
+
+            $zip->close();
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
         }
-
-        if ($file->max_downloads && $file->downloads >= $file->max_downloads) {
-            return response()->view('files.errors.limit-reached', compact('file'), 403);
-        }
-
-        $file->increment('downloads');
-
-        return Storage::disk('local')->download($file->file_path, $file->original_name);
-    }
+}
 
     public function destroy($id){
         $file = File::where('id', $id)

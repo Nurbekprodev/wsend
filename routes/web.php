@@ -4,6 +4,8 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/phpinfo', fn() => phpinfo());
+
 Route::get('/', function () {
     return view('home');
 });
