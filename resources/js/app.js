@@ -38,10 +38,36 @@ function setState(state) {
 /* ---------------- UI Events ---------------- */
 dropZone.addEventListener("click", () => fileInput.click());
 
+let selectedFiles = [];
+
 fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-        fileName.textContent = fileInput.files[0].name;
-    }
+    selectedFiles = [...selectedFiles, ...fileInput.files];
+
+    updateFileList();
+});
+
+function updateFileList() {
+    const fileList = document.getElementById("fileList");
+    fileList.innerHTML = "";
+
+    selectedFiles.forEach(file => {
+        const p = document.createElement("p");
+        p.textContent = file.name;
+        fileList.appendChild(p);
+    });
+
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    fileInput.files = dt.files;
+}
+
+
+// add more
+const addMoreBtn = document.getElementById("addMoreBtn");
+
+addMoreBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    fileInput.click();
 });
 
 dropZone.addEventListener("dragover", (e) => {
@@ -56,11 +82,17 @@ dropZone.addEventListener("dragleave", () => {
 dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("border-primary-500");
+
     fileInput.files = e.dataTransfer.files;
 
-    if (fileInput.files.length > 0) {
-        fileName.textContent = fileInput.files[0].name;
-    }
+    const fileList = document.getElementById("fileList");
+    fileList.innerHTML = "";
+
+    Array.from(fileInput.files).forEach(file => {
+        const p = document.createElement("p");
+        p.textContent = file.name;
+        fileList.appendChild(p);
+    });
 });
 
 /* ---------------- NEXT BUTTON (FIXED) ---------------- */
@@ -81,6 +113,21 @@ document.getElementById("backBtn").addEventListener("click", () => {
 /* ---------------- Upload ---------------- */
 form.addEventListener("submit", function (e) {
     e.preventDefault();
+
+
+// New Transfer
+document.getElementById("newTransferBtn")?.addEventListener("click", () => {
+    form.reset();
+
+    selectedFiles = [];          
+    updateFileList();            // clear UI
+
+    fileInput.value = "";
+    progressContainer.classList.add("hidden");
+    status.innerHTML = "";
+
+    setState("upload");
+});
 
 
     const file = fileInput.files[0];
@@ -184,12 +231,3 @@ form.addEventListener("submit", function (e) {
 /* ---------------- INIT ---------------- */
 setState("upload");
 
-/* ---------------- NEW TRANSFER ---------------- */
-document.getElementById("newTransferBtn")?.addEventListener("click", () => {
-    form.reset();
-    fileInput.value = "";
-    fileName.textContent = "";
-    progressContainer.classList.add("hidden");
-    status.innerHTML = "";
-    setState("upload");
-});
