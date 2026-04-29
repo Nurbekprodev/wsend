@@ -135,19 +135,35 @@ public function index(Request $request)
 
             $file = $files->first();
 
+            // expiry check
             if ($file->expires_at && now()->greaterThan($file->expires_at)) {
                 return response()->view('files.errors.expired', compact('file'), 410);
             }
 
+            // downloads count check
             if ($file->max_downloads && $file->downloads >= $file->max_downloads) {
                 return response()->view('files.errors.limit-reached', compact('file'), 403);
             }
 
+            // increment after each download
             $file->increment('downloads');
 
             return Storage::disk('local')->download($file->file_path, $file->original_name);
         }else {
 
+            $firstFile = $files->first();
+
+            // expiry check FIRST
+            if ($firstFile->expires_at && now()->greaterThan($firstFile->expires_at)) {
+                return response()->view('files.errors.expired', ['file' => $firstFile], 410);
+            }
+
+            // download limit check FIRST
+            if ($firstFile->max_downloads && $firstFile->downloads >= $firstFile->max_downloads) {
+                return response()->view('files.errors.limit-reached', ['file' => $firstFile], 403);
+            }
+
+            // create zip only if valid
             $zipName = Str::random(20) . '.zip';
             $tempDir = storage_path('app/temp');
             $zipPath = $tempDir . '/' . $zipName;
@@ -172,6 +188,10 @@ public function index(Request $request)
             }
 
             $zip->close();
+
+            foreach ($files as $file) {
+                $file->increment('downloads');
+            }
 
             return response()->download($zipPath)->deleteFileAfterSend(true);
         }
