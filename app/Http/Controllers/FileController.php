@@ -131,38 +131,24 @@ public function index(Request $request)
             return response()->view('files.errors.not-found', [], 404);
         }
 
+        $baseFile = $files->first(); 
+
+        // expiry check
+        if ($baseFile->expires_at && now()->greaterThan($baseFile->expires_at)) {
+            return response()->view('files.errors.expired', compact('file'), 410);
+        }
+        // downloads count check
+        if ($baseFile->max_downloads && $baseFile->downloads >= $baseFile->max_downloads) {
+            return response()->view('files.errors.limit-reached', compact('baseFile'), 403);
+        }
+
+
         if ($files->count() == 1) {
-
-            $file = $files->first();
-
-            // expiry check
-            if ($file->expires_at && now()->greaterThan($file->expires_at)) {
-                return response()->view('files.errors.expired', compact('file'), 410);
-            }
-
-            // downloads count check
-            if ($file->max_downloads && $file->downloads >= $file->max_downloads) {
-                return response()->view('files.errors.limit-reached', compact('file'), 403);
-            }
-
             // increment after each download
-            $file->increment('downloads');
+            $baseFile->increment('downloads');
 
-            return Storage::disk('local')->download($file->file_path, $file->original_name);
+            return Storage::disk('local')->download($baseFile->file_path, $baseFile->original_name);
         }else {
-
-            $firstFile = $files->first();
-
-            // expiry check FIRST
-            if ($firstFile->expires_at && now()->greaterThan($firstFile->expires_at)) {
-                return response()->view('files.errors.expired', ['file' => $firstFile], 410);
-            }
-
-            // download limit check FIRST
-            if ($firstFile->max_downloads && $firstFile->downloads >= $firstFile->max_downloads) {
-                return response()->view('files.errors.limit-reached', ['file' => $firstFile], 403);
-            }
-
             // create zip only if valid
             $zipName = Str::random(20) . '.zip';
             $tempDir = storage_path('app/temp');
@@ -177,14 +163,22 @@ public function index(Request $request)
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
                 abort(500, 'ZIP creation failed');
             }
-
+            
+            // counter
+            $added = 0;
             foreach ($files as $file) {
 
                 $fullPath = Storage::disk('local')->path($file->file_path);
 
                 if (file_exists($fullPath)) {
                     $zip->addFile($fullPath, $file->original_name);
+                    $added ++;
                 }
+            }
+
+            // if file empty abort
+            if ($added === 0) {
+                abort(404, "No valid files found");
             }
 
             $zip->close();
@@ -195,7 +189,7 @@ public function index(Request $request)
 
             return response()->download($zipPath)->deleteFileAfterSend(true);
         }
-}
+    }
 
     public function destroy($id){
         $file = File::where('id', $id)

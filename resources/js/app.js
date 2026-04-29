@@ -19,6 +19,22 @@ const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
 const status = document.getElementById("status");
 
+const uploadBox = document.getElementById("uploadBox");
+const settingsBox = document.getElementById("settingsBox");
+const resultBox = document.getElementById("resultBox");
+
+
+/* ---------------- State System ---------------- */
+function setState(state) {
+    uploadBox.classList.add("hidden");
+    settingsBox.classList.add("hidden");
+    resultBox.classList.add("hidden");
+
+    if (state === "upload") uploadBox.classList.remove("hidden");
+    if (state === "settings") settingsBox.classList.remove("hidden");
+    if (state === "result") resultBox.classList.remove("hidden");
+}
+
 /* ---------------- UI Events ---------------- */
 dropZone.addEventListener("click", () => fileInput.click());
 
@@ -47,9 +63,25 @@ dropZone.addEventListener("drop", (e) => {
     }
 });
 
+/* ---------------- NEXT BUTTON (FIXED) ---------------- */
+document.getElementById("nextBtn").addEventListener("click", () => {
+    if (!fileInput.files.length) {
+        alert("Select a file first");
+        return;
+    }
+
+    setState("settings");
+});
+
+/* ---------------- BACK BUTTON (FIXED) ---------------- */
+document.getElementById("backBtn").addEventListener("click", () => {
+    setState("upload");
+});
+
 /* ---------------- Upload ---------------- */
 form.addEventListener("submit", function (e) {
     e.preventDefault();
+
 
     const file = fileInput.files[0];
 
@@ -119,12 +151,12 @@ form.addEventListener("submit", function (e) {
         }
 
         if (xhr.status === 200) {
-            const resultBox = document.getElementById("resultBox");
             const fileLinkInput = document.getElementById("fileLink");
             const copyBtn = document.getElementById("copyBtn");
 
-            resultBox.classList.remove("hidden");
             fileLinkInput.value = res.url;
+
+            setState("result");
 
             copyBtn.onclick = () => {
                 navigator.clipboard.writeText(res.url);
@@ -132,6 +164,7 @@ form.addEventListener("submit", function (e) {
                 setTimeout(() => (copyBtn.innerText = "Copy"), 1500);
             };
 
+            // reset UI
             fileInput.value = "";
             fileName.textContent = "";
             progressContainer.classList.add("hidden");
@@ -146,4 +179,17 @@ form.addEventListener("submit", function (e) {
     };
 
     xhr.send(formData);
+});
+
+/* ---------------- INIT ---------------- */
+setState("upload");
+
+/* ---------------- NEW TRANSFER ---------------- */
+document.getElementById("newTransferBtn")?.addEventListener("click", () => {
+    form.reset();
+    fileInput.value = "";
+    fileName.textContent = "";
+    progressContainer.classList.add("hidden");
+    status.innerHTML = "";
+    setState("upload");
 });
