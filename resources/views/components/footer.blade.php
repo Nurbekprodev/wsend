@@ -9,7 +9,7 @@
                     <img 
                         src="{{ asset('images/logo_img.png') }}" 
                         alt="logo"
-                        class="h-10 w-auto">
+                        class="h-16 w-auto">
                 </a>
                 <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                     Fast, secure file sharing with auto-expiring links. No signup required.

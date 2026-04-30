@@ -6,7 +6,7 @@
             <img 
                 src="{{ asset('images/logo_img.png') }}" 
                 alt="logo"
-                class="h-10 w-auto">
+                class="h-16 w-auto">
         </a>
 
         <!-- Right side -->
