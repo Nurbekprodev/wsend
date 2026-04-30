@@ -7,11 +7,20 @@
 
                 <!-- Icon -->
                 <div class="flex justify-center mb-6">
-                    @php
-                        $ext = strtolower(pathinfo($file->original_name, PATHINFO_EXTENSION));
-                    @endphp
+                @php
+                    $baseFile = $files->first();
+                    $totalSize = $files->sum('file_size');
+                    $ext = strtolower(pathinfo($baseFile->original_name, PATHINFO_EXTENSION));
+                @endphp
 
-                    @if(in_array($ext, ['jpg','jpeg','png','gif','webp','svg']))
+                @if($files->count() > 1)
+                    <!-- generic icon -->
+                    <div class="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 11h10M7 15h6"/>
+                        </svg>
+                    </div>
+                @elseif(in_array($ext, ['jpg','jpeg','png','gif','webp','svg']))
                         <div class="w-16 h-16 rounded-2xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
                             <svg class="w-8 h-8 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -56,9 +65,11 @@
                 </h1>
 
                 <!-- File name -->
-                <p class="text-center text-sm text-gray-600 dark:text-gray-400 break-all mb-6 px-4">
-                    {{ $file->original_name }}
-                </p>
+                @foreach($files as $file)
+                    <p class="text-sm text-gray-600 dark:text-gray-400 break-all pb-2">
+                        {{ $file->original_name }}
+                    </p>
+                @endforeach
 
                 <!-- Info box -->
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-5 space-y-4 text-sm mb-6">
@@ -71,7 +82,7 @@
                             Size
                         </span>
                         <span class="font-semibold text-gray-900 dark:text-white">
-                            {{ number_format($file->file_size / 1024 / 1024, 2) }} MB
+                            {{ number_format($totalSize / 1024 / 1024, 2) }} MB
                         </span>
                     </div>
 
@@ -83,7 +94,7 @@
                             Expires
                         </span>
                         <span class="font-semibold text-gray-900 dark:text-white">
-                            {{ optional($file->expires_at)->diffForHumans() ?? 'Never' }}
+                            {{ optional($baseFile->expires_at)->diffForHumans() ?? 'Never' }}
                         </span>
                     </div>
 
@@ -95,11 +106,11 @@
                             Downloads left
                         </span>
                         <span class="font-semibold text-gray-900 dark:text-white">
-                            @if(is_null($file->max_downloads))
-                                Unlimited
-                            @else
-                                {{ $file->max_downloads - $file->downloads }}
-                            @endif
+                        @if(is_null($baseFile->max_downloads))
+                            Unlimited
+                        @else
+                            {{ $baseFile->max_downloads - $baseFile->downloads }}
+                        @endif
                         </span>
                     </div>
 
@@ -111,7 +122,7 @@
                             Uploaded
                         </span>
                         <span class="font-semibold text-gray-900 dark:text-white">
-                            {{ $file->created_at->format('M d, Y') }}
+                            {{ $baseFile->created_at->format('M d, Y') }}
                         </span>
                     </div>
 
@@ -119,7 +130,7 @@
 
                 <!-- Download button -->
                 <x-button-primary 
-                    href="/download/{{ $file->token }}"
+                    href="/download/{{ $baseFile->token }}"
                     class="w-full py-3 text-base font-semibold rounded-xl">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>

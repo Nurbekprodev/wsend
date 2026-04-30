@@ -38,6 +38,22 @@ function setState(state) {
 /* ---------------- UI Events ---------------- */
 dropZone.addEventListener("click", () => fileInput.click());
 
+// New Transfer
+document.getElementById("newTransferBtn")?.addEventListener("click", () => {
+    form.reset();
+
+    selectedFiles = [];          
+    updateFileList();            // clear UI
+
+    fileInput.value = "";
+    progressContainer.classList.add("hidden");
+    status.innerHTML = "";
+
+    setState("upload");
+});
+
+
+
 let selectedFiles = [];
 
 fileInput.addEventListener("change", () => {
@@ -130,29 +146,32 @@ document.getElementById("newTransferBtn")?.addEventListener("click", () => {
 });
 
 
-    const file = fileInput.files[0];
+const files = fileInput.files;
 
-    const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "application/pdf",
-        "application/zip",
-        "application/x-zip-compressed",
-        "text/plain",
-    ];
+if (!files.length) {
+    status.innerHTML = "Please select at least one file";
+    return;
+}
 
-    if (!file) {
-        status.innerHTML = "Please select a file";
+const blockedExtensions = [
+    "exe","bat","cmd","sh","php","js",
+    "msi","dll","com","scr","vbs","jar"
+];
+
+for (let file of files) {
+
+if (file.size > 10 * 1024 * 1024) {
+    status.innerHTML = `File too large: ${file.name} (max 10MB)`;
+    return;
+}
+
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (blockedExtensions.includes(ext)) {
+        status.innerHTML = `This file type isn't allowed: ${file.name}`;
         return;
     }
-
-    const isValid =
-        allowedTypes.includes(file.type) || file.name.endsWith(".zip");
-
-    if (!isValid) {
-        status.innerHTML = "Invalid file type";
-        return;
-    }
+}
 
     status.innerHTML = "";
 
@@ -180,6 +199,8 @@ document.getElementById("newTransferBtn")?.addEventListener("click", () => {
     xhr.onload = function () {
         submitBtn.disabled = false;
         submitBtn.innerText = "Upload & Get Link";
+
+
 
         let res = {};
         try {
@@ -210,6 +231,8 @@ document.getElementById("newTransferBtn")?.addEventListener("click", () => {
                 copyBtn.innerText = "Copied!";
                 setTimeout(() => (copyBtn.innerText = "Copy"), 1500);
             };
+
+                   
 
             // reset UI
             fileInput.value = "";

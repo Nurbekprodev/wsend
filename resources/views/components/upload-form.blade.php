@@ -34,7 +34,7 @@
                                     or click to browse
                                 </p>
                                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                                    Supports all file types up to 100MB
+                                    Supports all file types up to 10MB
                                 </p>
                             </div>
 
@@ -123,30 +123,33 @@
                                 type="button"
                                 id="backBtn"
                                 class="w-full py-3 text-base font-medium rounded-xl">
-                                Back
+                                Back 
                             </x-button-secondary>
                         </div>
 
                     </div>
 
-
                     <!-- RESULT BLOCK -->
                     <div id="resultBox" class="hidden">
 
+                        <!-- Success -->
                         <div class="text-center mb-6">
                             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                                 <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </div>
+
                             <p class="text-xl font-semibold text-green-600 dark:text-green-400">
                                 Upload complete
                             </p>
+
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Your file is ready to share
+                                Your files are ready to share
                             </p>
                         </div>
 
+                        <!-- Link -->
                         <div class="flex gap-2">
                             <x-input 
                                 id="fileLink"
@@ -162,6 +165,44 @@
                             </x-button-primary>
                         </div>
 
+                        <!-- CTA (Guest only) -->
+                        @guest
+                        <div class="mt-6 p-5 rounded-xl border border-blue-100 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-900/20 text-center">
+
+                            <p class="text-sm text-gray-700 dark:text-gray-300">
+                                Want to track downloads and manage your files?
+                            </p>
+
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Create a free account — takes less than 10 seconds
+                            </p>
+
+                            <div class="mt-4 flex flex-col gap-2">
+                                <a href="/register"
+                                class="w-full px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">
+                                    Track files — Sign up free
+                                </a>
+
+                                <a href="/login"
+                                class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                    Already have an account? Log in
+                                </a>
+                            </div>
+
+                        </div>
+                        @endguest
+
+                        <!-- CTA (Logged in) -->
+                        @auth
+                        <div class="mt-6 text-center">
+                            <a href="/dashboard"
+                            class="inline-block w-full px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition">
+                                View in dashboard
+                            </a>
+                        </div>
+                        @endauth
+
+                        <!-- New transfer -->
                         <div class="mt-6 text-center">
                             <button 
                                 id="newTransferBtn"
@@ -170,7 +211,7 @@
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                New transfer
+                                Upload another file
                             </button>
                         </div>
 

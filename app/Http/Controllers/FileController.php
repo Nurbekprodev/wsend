@@ -35,7 +35,7 @@ public function index(Request $request)
             $query->orderBy('created_at', 'desc'); // default newest
         }
 
-        $files = $query->paginate(8);
+        $files = $query->paginate(6);
 
         return view('dashboard', compact('files'));
     }
@@ -46,21 +46,23 @@ public function index(Request $request)
 
     public function show($token)
     {
-        $file = File::where('token', $token)->first();
+        $files = File::where('token', $token)->get();
 
-        if (!$file) {
+        if ($files->isEmpty()) {
             return response()->view('files.errors.not-found', [], 404);
         }
 
-        if ($file->expires_at && now()->greaterThan($file->expires_at)) {
-            return response()->view('files.errors.expired', compact('file'), 410);
+        $baseFile = $files->first();
+
+        if ($baseFile->expires_at && now()->greaterThan($baseFile->expires_at)) {
+            return response()->view('files.errors.expired', compact('baseFile'), 410);
         }
 
-        if ($file->password) {
-            return view('files.password', compact('file'));
+        if ($baseFile->password) {
+            return view('files.password', compact('files'));
         }
 
-        return view('files.file', compact('file'));
+        return view('files.file', compact('files'));
     }
 
     // Unlock
@@ -87,9 +89,9 @@ public function index(Request $request)
 
         $validator = Validator::make($request->all(), [
             'files' => 'required|array',
-            'files.*' => 'required|file|mimetypes:image/jpeg,image/png,application/pdf,application/zip,text/plain|max:10240',
+            'files.*' => 'required|file|max:10240',
             'expires_in' => 'required|integer|in:1,3,7',
-            'max_downloads' => 'nullable|integer|min:1|max:100',
+            'max_downloads' => 'nullable|integer|min:1|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -98,27 +100,39 @@ public function index(Request $request)
             ], 422);
         }
 
+        // blocked file types
+        $blocked = [
+            'exe','bat','cmd','sh','php','js',
+            'msi','dll','com','scr','vbs','jar'
+        ];   
 
-        foreach($files as $file){
+
+        foreach ($files as $file) {
+
+            $ext = strtolower($file->getClientOriginalExtension());
+
+            if (in_array($ext, $blocked)) {
+                return response()->json([
+                    'error' => "File type .$ext is not allowed"
+                ], 422);
+            }
+
             $path = $file->store('files', 'local');
 
-            // create file
-            $model = File::create([
+            File::create([
                 'user_id' => auth()->user() ? auth()->id() : null,
                 'original_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
                 'file_size' => $file->getSize(),
-                'token' => $token,  
+                'token' => $token,
                 'expires_at' => now()->addDays($days),
                 'max_downloads' => $max_downloads,
                 'password' => $request->password ? bcrypt($request->password) : null,
             ]);
-
-
         }
 
         return response()->json([
-            'url' => url('/file/' . $model->token)
+            'url' => url('/file/' . $token)
         ]);
     }
 
@@ -135,7 +149,7 @@ public function index(Request $request)
 
         // expiry check
         if ($baseFile->expires_at && now()->greaterThan($baseFile->expires_at)) {
-            return response()->view('files.errors.expired', compact('file'), 410);
+            return response()->view('files.errors.expired', compact('baseFile'), 410);
         }
         // downloads count check
         if ($baseFile->max_downloads && $baseFile->downloads >= $baseFile->max_downloads) {
@@ -151,7 +165,6 @@ public function index(Request $request)
         }else {
             // create zip only if valid
             $zipName = Str::random(20) . '.zip';
-            $tempDir = storage_path('app/temp');
             $zipPath = $tempDir . '/' . $zipName;
 
             if (!file_exists($tempDir)) {
@@ -171,7 +184,7 @@ public function index(Request $request)
                 $fullPath = Storage::disk('local')->path($file->file_path);
 
                 if (file_exists($fullPath)) {
-                    $zip->addFile($fullPath, $file->original_name);
+                    $zip->addFile($fullPath, uniqid() . '_' . $file->original_name);
                     $added ++;
                 }
             }

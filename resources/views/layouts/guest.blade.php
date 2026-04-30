@@ -23,7 +23,10 @@
     <!-- Logo -->
     <div class="text-center mb-8">
         <a href="/">
-            <x-application-logo class="w-16 h-16 mx-auto text-gray-400" />
+            <img 
+                src="{{ asset('images/logo_img.png') }}" 
+                alt="logo"
+                class="w-20 h-20 mx-auto text-gray-400">
         </a>
 
         <!-- <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
