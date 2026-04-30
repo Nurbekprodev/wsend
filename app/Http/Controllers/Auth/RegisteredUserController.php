@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -46,6 +47,18 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        $guestToken = $request->cookie('guest_token');
+
+        if ($guestToken) {
+            File::where('guest_token', $guestToken)
+                ->update([
+                    'user_id' => auth()->id(),
+                    'guest_token' => null,
+                ]);
+        }        
+
+        return redirect()->intended(route('dashboard', absolute: false))
+            ->withoutCookie('guest_token');
     }
+
 }

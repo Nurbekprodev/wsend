@@ -68,18 +68,40 @@ public function index(Request $request)
     // Unlock
     public function unlock(Request $request, $token)
     {
-        $file = File::where('token', $token)->firstOrFail();
+        $files = File::where('token', $token)->get();
 
-        if (!Hash::check($request->password, $file->password)) {
-            return back()->with('password', 'Wrong password');
+        if ($files->isEmpty()) {
+            abort(404);
         }
 
-        return view('files.file', compact('file'));
+        $baseFile = $files->first();
+
+        // password check (group-based)
+        if (!empty($baseFile->password)) {
+            if (!Hash::check($request->password, $baseFile->password)) {
+                return back()->with('password', 'Incorrect password. Please try again.');
+            }
+        }
+
+        return view('files.file', compact('files'));
     }
 
     // store
     public function store(Request $request)
     {
+        // assign gueat token
+        $guestToken = null;
+
+        // check if user is guest
+        if(!auth()->check()){
+            $guestToken = $request->cookie('guest_token');
+
+            if(!$guestToken){
+                $guestToken = Str::random(40);
+            }
+        }
+
+
         // accept files
         $files = $request->file('files');
         // one token for all files
@@ -107,6 +129,50 @@ public function index(Request $request)
         ];   
 
 
+        // STORAGE LIMIT LOGIC
+        // Apply limit (guest -> 100MB, user -> 200MB)
+        $limit = auth()->check()
+            ? 200 * 1024 * 1024
+            : 100 * 1034 * 1024;
+
+        // current file size
+        if(auth()->check()){
+            $currentUsage = File::where('user_id', auth()->id())
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+                })
+                ->sum('file_size');
+        }else{
+            $currentUsage = File::where('guest_token', $guestToken)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+                })
+                ->sum('file_size');
+        }
+
+        // new upload size (Block if exceeds)
+        $newUploadSize = collect($files)->sum(function ($file){
+            return $file->getSize();
+        });
+
+        // check limit
+        if($currentUsage + $newUploadSize > $limit){
+            if(auth()->check()){
+                return response()->json([
+                    'error' => 'Storage limit exceeded.'
+                ], 422);
+            }else{
+                return response()->json([
+                    'error' => "You've reached 100MB. Sign up for more space."
+                ], 422);
+            }
+
+        }
+
+
+        // SAVE FILES
         foreach ($files as $file) {
 
             $ext = strtolower($file->getClientOriginalExtension());
@@ -128,12 +194,20 @@ public function index(Request $request)
                 'expires_at' => now()->addDays($days),
                 'max_downloads' => $max_downloads,
                 'password' => $request->password ? bcrypt($request->password) : null,
+                'guest_token' => $guestToken,
             ]);
         }
 
-        return response()->json([
+
+        $response = response()->json([
             'url' => url('/file/' . $token)
         ]);
+
+        if(!auth()->check()){
+            return $response->cookie('guest_token', $guestToken, 60 * 24 * 7  );     // 7 days
+        }
+
+        return $response;
     }
 
     public function download($token)

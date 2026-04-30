@@ -25,6 +25,7 @@ return new class extends Migration
         $table->integer('downloads')->default(0);
         $table->integer('max_downloads')->nullable();
         $table->string('password')->nullable();
+        $table->string('guest_token')->nullable()->index();
     });
     }
 
