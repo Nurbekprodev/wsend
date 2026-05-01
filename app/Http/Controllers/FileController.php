@@ -12,7 +12,26 @@ use Illuminate\Support\Facades\Validator;
 
 class FileController extends Controller
 {
-public function index(Request $request)
+    private function getFilesByToken($token)
+    {
+        return File::where('token', $token)->get();
+    }
+
+    private function generateToken($length = 20)
+    {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
+
+        $token = '';
+        $max = strlen($chars) - 1;
+
+        for ($i = 0; $i < $length; $i++) {
+            $token .= $chars[random_int(0, $max)];
+        }
+
+        return $token;
+    }
+
+    public function index(Request $request)
     {
         $query = File::where('user_id', Auth::id());
 
@@ -24,7 +43,6 @@ public function index(Request $request)
             $query->where('type', $request->type);
         }
 
-        // SORT (only ONE active order)
         if ($request->sort == 'oldest') {
             $query->orderBy('created_at', 'asc');
         } elseif ($request->sort == 'largest') {
@@ -32,7 +50,7 @@ public function index(Request $request)
         } elseif ($request->sort == 'smallest') {
             $query->orderBy('file_size', 'asc');
         } else {
-            $query->orderBy('created_at', 'desc'); // default newest
+            $query->orderBy('created_at', 'desc');
         }
 
         $files = $query->paginate(6);
@@ -40,13 +58,14 @@ public function index(Request $request)
         return view('dashboard', compact('files'));
     }
 
-    public function upload(){
+    public function upload()
+    {
         return view('files.upload');
     }
 
     public function show($token)
     {
-        $files = File::where('token', $token)->get();
+        $files = $this->getFilesByToken($token);
 
         if ($files->isEmpty()) {
             return response()->view('files.errors.not-found', [], 404);
@@ -65,10 +84,9 @@ public function index(Request $request)
         return view('files.file', compact('files'));
     }
 
-    // Unlock
     public function unlock(Request $request, $token)
     {
-        $files = File::where('token', $token)->get();
+        $files = $this->getFilesByToken($token);
 
         if ($files->isEmpty()) {
             abort(404);
@@ -76,7 +94,6 @@ public function index(Request $request)
 
         $baseFile = $files->first();
 
-        // password check (group-based)
         if (!empty($baseFile->password)) {
             if (!Hash::check($request->password, $baseFile->password)) {
                 return back()->with('password', 'Incorrect password. Please try again.');
@@ -86,28 +103,17 @@ public function index(Request $request)
         return view('files.file', compact('files'));
     }
 
-    // store
     public function store(Request $request)
     {
-        // assign gueat token
         $guestToken = null;
 
-        // check if user is guest
-        if(!auth()->check()){
+        if (!auth()->check()) {
             $guestToken = $request->cookie('guest_token');
 
-            if(!$guestToken){
+            if (!$guestToken) {
                 $guestToken = Str::random(40);
             }
         }
-
-
-        // accept files
-        $files = $request->file('files');
-        // one token for all files
-        $token = Str::random(20);
-        $days = (int) $request->expires_in;
-        $max_downloads = $request->max_downloads ?: null;
 
         $validator = Validator::make($request->all(), [
             'files' => 'required|array',
@@ -118,75 +124,77 @@ public function index(Request $request)
 
         if ($validator->fails()) {
             return response()->json([
-                'errors' => $validator->errors()
+                'errors' => $validator->errors()->toArray()
             ], 422);
         }
 
-        // blocked file types
+        $files = $request->file('files');
+
+        do {
+            $token = $this->generateToken(20);
+        } while (File::where('token', $token)->exists());
+
+        $days = (int) $request->expires_in;
+        $max_downloads = $request->max_downloads ?: null;
+
         $blocked = [
             'exe','bat','cmd','sh','php','js',
             'msi','dll','com','scr','vbs','jar'
-        ];   
+        ];
 
-
-        // STORAGE LIMIT LOGIC
-        // Apply limit (guest -> 100MB, user -> 200MB)
         $limit = auth()->check()
             ? 200 * 1024 * 1024
-            : 100 * 1034 * 1024;
+            : 100 * 1024 * 1024;
 
-        // current file size
-        if(auth()->check()){
+        if (auth()->check()) {
             $currentUsage = File::where('user_id', auth()->id())
                 ->where(function ($q) {
                     $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
+                      ->orWhere('expires_at', '>', now());
                 })
                 ->sum('file_size');
-        }else{
+        } else {
             $currentUsage = File::where('guest_token', $guestToken)
                 ->where(function ($q) {
                     $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
+                      ->orWhere('expires_at', '>', now());
                 })
                 ->sum('file_size');
         }
 
-        // new upload size (Block if exceeds)
-        $newUploadSize = collect($files)->sum(function ($file){
-            return $file->getSize();
-        });
+        $newUploadSize = collect($files)->sum(fn($file) => $file->getSize());
 
-        // check limit
-        if($currentUsage + $newUploadSize > $limit){
-            if(auth()->check()){
-                return response()->json([
-                    'error' => 'Storage limit exceeded.'
-                ], 422);
-            }else{
-                return response()->json([
-                    'error' => "You've reached 100MB. Sign up for more space."
-                ], 422);
-            }
-
+        if ($currentUsage + $newUploadSize > $limit) {
+            return response()->json([
+                'errors' => [
+                    'files' => [
+                        auth()->check()
+                            ? 'Storage limit exceeded.'
+                            : "You've reached 100MB. Sign up for more space."
+                    ]
+                ]
+            ], 422);
         }
 
-
-        // SAVE FILES
         foreach ($files as $file) {
 
             $ext = strtolower($file->getClientOriginalExtension());
+            $mime = $file->getMimeType();
 
-            if (in_array($ext, $blocked)) {
+            if (
+                in_array($ext, $blocked) ||
+                str_contains($mime, 'application/x-msdownload') ||
+                str_contains($mime, 'executable')
+            ) {
                 return response()->json([
-                    'error' => "File type .$ext is not allowed"
+                    'errors' => ['files' => ["File type ($ext) is not allowed"]]
                 ], 422);
             }
 
-            $path = $file->store('files', 'local');
+            $path = $file->store('files', config('filesystems.default'));
 
             File::create([
-                'user_id' => auth()->user() ? auth()->id() : null,
+                'user_id' => auth()->id(),
                 'original_name' => $file->getClientOriginalName(),
                 'file_path' => $path,
                 'file_size' => $file->getSize(),
@@ -198,13 +206,12 @@ public function index(Request $request)
             ]);
         }
 
-
         $response = response()->json([
             'url' => url('/file/' . $token)
         ]);
 
-        if(!auth()->check()){
-            return $response->cookie('guest_token', $guestToken, 60 * 24 * 7  );     // 7 days
+        if (!auth()->check()) {
+            return $response->cookie('guest_token', $guestToken, 60 * 24 * 7);
         }
 
         return $response;
@@ -212,83 +219,79 @@ public function index(Request $request)
 
     public function download($token)
     {
-        $files = File::where('token', $token)->get();
-        $tempDir = storage_path('app/temp');
+        $files = $this->getFilesByToken($token);
 
         if ($files->isEmpty()) {
             return response()->view('files.errors.not-found', [], 404);
         }
 
-        $baseFile = $files->first(); 
+        $baseFile = $files->first();
 
-        // expiry check
         if ($baseFile->expires_at && now()->greaterThan($baseFile->expires_at)) {
             return response()->view('files.errors.expired', compact('baseFile'), 410);
         }
-        // downloads count check
+
         if ($baseFile->max_downloads && $baseFile->downloads >= $baseFile->max_downloads) {
             return response()->view('files.errors.limit-reached', compact('baseFile'), 403);
         }
 
+        $disk = config('filesystems.default');
 
         if ($files->count() == 1) {
-            // increment after each download
-            $baseFile->increment('downloads');
+            File::where('token', $token)->increment('downloads');
 
-            return Storage::disk('local')->download($baseFile->file_path, $baseFile->original_name);
-        }else {
-            // create zip only if valid
-            $zipName = Str::random(20) . '.zip';
-            $zipPath = $tempDir . '/' . $zipName;
-
-            if (!file_exists($tempDir)) {
-                mkdir($tempDir, 0777, true);
-            }
-
-            $zip = new \ZipArchive();
-
-            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
-                abort(500, 'ZIP creation failed');
-            }
-            
-            // counter
-            $added = 0;
-            foreach ($files as $file) {
-
-                $fullPath = Storage::disk('local')->path($file->file_path);
-
-                if (file_exists($fullPath)) {
-                    $zip->addFile($fullPath, uniqid() . '_' . $file->original_name);
-                    $added ++;
-                }
-            }
-
-            // if file empty abort
-            if ($added === 0) {
-                abort(404, "No valid files found");
-            }
-
-            $zip->close();
-
-            foreach ($files as $file) {
-                $file->increment('downloads');
-            }
-
-            return response()->download($zipPath)->deleteFileAfterSend(true);
+            return Storage::disk($disk)->download(
+                $baseFile->file_path,
+                $baseFile->original_name
+            );
         }
+
+        $zipName = Str::random(20) . '.zip';
+        $tempDir = storage_path('app/temp');
+        $zipPath = $tempDir . '/' . $zipName;
+
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
+            abort(500, 'ZIP creation failed');
+        }
+
+        $added = 0;
+
+        foreach ($files as $file) {
+            $fullPath = Storage::disk($disk)->path($file->file_path);
+
+            if (file_exists($fullPath)) {
+                $zip->addFile($fullPath, uniqid() . '_' . $file->original_name);
+                $added++;
+            }
+        }
+
+        if ($added === 0) {
+            abort(404, "No valid files found");
+        }
+
+        $zip->close();
+
+        File::where('token', $token)->increment('downloads');
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $file = File::where('id', $id)
-           ->where('user_id', auth()->id())
-           ->firstOrFail();
-      
-        Storage::disk('local')->delete($file->file_path);
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
+        Storage::disk(config('filesystems.default'))->delete($file->file_path);
 
         $file->delete();
 
-        
         return back()->with('success', 'File deleted successfully.');
     }
 }

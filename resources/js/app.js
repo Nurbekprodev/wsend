@@ -14,7 +14,6 @@ const token = document
 const form = document.getElementById("uploadForm");
 const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
-const fileName = document.getElementById("fileName");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
 const status = document.getElementById("status");
@@ -23,6 +22,9 @@ const uploadBox = document.getElementById("uploadBox");
 const settingsBox = document.getElementById("settingsBox");
 const resultBox = document.getElementById("resultBox");
 
+/* ---------------- Config ---------------- */
+const MAX_TOTAL_SIZE = 200 * 1024 * 1024; // matches backend max
+const MAX_FILES = 20;
 
 /* ---------------- State System ---------------- */
 function setState(state) {
@@ -35,33 +37,10 @@ function setState(state) {
     if (state === "result") resultBox.classList.remove("hidden");
 }
 
-/* ---------------- UI Events ---------------- */
-dropZone.addEventListener("click", () => fileInput.click());
-
-// New Transfer
-document.getElementById("newTransferBtn")?.addEventListener("click", () => {
-    form.reset();
-
-    selectedFiles = [];          
-    updateFileList();            // clear UI
-
-    fileInput.value = "";
-    progressContainer.classList.add("hidden");
-    status.innerHTML = "";
-
-    setState("upload");
-});
-
-
-
+/* ---------------- State ---------------- */
 let selectedFiles = [];
 
-fileInput.addEventListener("change", () => {
-    selectedFiles = [...selectedFiles, ...fileInput.files];
-
-    updateFileList();
-});
-
+/* ---------------- Helpers ---------------- */
 function updateFileList() {
     const fileList = document.getElementById("fileList");
     fileList.innerHTML = "";
@@ -77,15 +56,37 @@ function updateFileList() {
     fileInput.files = dt.files;
 }
 
+/* ---------------- UI Events ---------------- */
 
-// add more
-const addMoreBtn = document.getElementById("addMoreBtn");
+// Click dropzone
+dropZone.addEventListener("click", () => fileInput.click());
 
-addMoreBtn.addEventListener("click", (e) => {
+// File select
+fileInput.addEventListener("change", () => {
+    const newFiles = Array.from(fileInput.files);
+
+    // prevent duplicates
+    const filtered = newFiles.filter(f =>
+        !selectedFiles.some(sf => sf.name === f.name && sf.size === f.size)
+    );
+
+    selectedFiles = [...selectedFiles, ...filtered];
+
+    if (selectedFiles.length > MAX_FILES) {
+        status.innerHTML = "Max 20 files allowed";
+        selectedFiles = selectedFiles.slice(0, MAX_FILES);
+    }
+
+    updateFileList();
+});
+
+// Add more
+document.getElementById("addMoreBtn").addEventListener("click", (e) => {
     e.stopPropagation();
     fileInput.click();
 });
 
+// Drag & drop
 dropZone.addEventListener("dragover", (e) => {
     e.preventDefault();
     dropZone.classList.add("border-primary-500");
@@ -99,44 +100,52 @@ dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("border-primary-500");
 
-    fileInput.files = e.dataTransfer.files;
+    const dropped = Array.from(e.dataTransfer.files);
 
-    const fileList = document.getElementById("fileList");
-    fileList.innerHTML = "";
+    const filtered = dropped.filter(f =>
+        !selectedFiles.some(sf => sf.name === f.name && sf.size === f.size)
+    );
 
-    Array.from(fileInput.files).forEach(file => {
-        const p = document.createElement("p");
-        p.textContent = file.name;
-        fileList.appendChild(p);
-    });
+    selectedFiles = [...selectedFiles, ...filtered];
+
+    if (selectedFiles.length > MAX_FILES) {
+        status.innerHTML = "Max 20 files allowed";
+        selectedFiles = selectedFiles.slice(0, MAX_FILES);
+    }
+
+    updateFileList();
 });
 
-/* ---------------- NEXT BUTTON (FIXED) ---------------- */
+// Next
 document.getElementById("nextBtn").addEventListener("click", () => {
     if (!fileInput.files.length) {
-        alert("Select a file first");
+        status.innerHTML = "Select at least one file";
+
+        dropZone.style.borderColor = "red";
+        // dropZone.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.3)";
+
+        setTimeout(() => {
+            dropZone.style.borderColor = "";
+            dropZone.style.boxShadow = "";
+        }, 1500);
+
         return;
     }
 
+    status.innerHTML = "";
     setState("settings");
 });
 
-/* ---------------- BACK BUTTON (FIXED) ---------------- */
+// Back
 document.getElementById("backBtn").addEventListener("click", () => {
     setState("upload");
 });
 
-/* ---------------- Upload ---------------- */
-form.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-
-// New Transfer
+// New transfer
 document.getElementById("newTransferBtn")?.addEventListener("click", () => {
     form.reset();
-
-    selectedFiles = [];          
-    updateFileList();            // clear UI
+    selectedFiles = [];
+    updateFileList();
 
     fileInput.value = "";
     progressContainer.classList.add("hidden");
@@ -145,33 +154,43 @@ document.getElementById("newTransferBtn")?.addEventListener("click", () => {
     setState("upload");
 });
 
+/* ---------------- Upload ---------------- */
+form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-const files = fileInput.files;
+    const files = fileInput.files;
 
-if (!files.length) {
-    status.innerHTML = "Please select at least one file";
-    return;
-}
-
-const blockedExtensions = [
-    "exe","bat","cmd","sh","php","js",
-    "msi","dll","com","scr","vbs","jar"
-];
-
-for (let file of files) {
-
-if (file.size > 10 * 1024 * 1024) {
-    status.innerHTML = `File too large: ${file.name} (max 10MB)`;
-    return;
-}
-
-    const ext = file.name.split('.').pop().toLowerCase();
-
-    if (blockedExtensions.includes(ext)) {
-        status.innerHTML = `This file type isn't allowed: ${file.name}`;
+    if (!files.length) {
+        status.innerHTML = "Please select at least one file";
         return;
     }
-}
+
+    const blockedExtensions = [
+        "exe","bat","cmd","sh","php","js",
+        "msi","dll","com","scr","vbs","jar"
+    ];
+
+    // total size
+    const totalSize = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+    if (totalSize > MAX_TOTAL_SIZE) {
+        status.innerHTML = "Total upload exceeds limit";
+        return;
+    }
+
+    for (let file of files) {
+
+        if (file.size > 10 * 1024 * 1024) {
+            status.innerHTML = `File too large: ${file.name} (max 10MB)`;
+            return;
+        }
+
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        if (blockedExtensions.includes(ext)) {
+            status.innerHTML = `File type not allowed: ${file.name}`;
+            return;
+        }
+    }
 
     status.innerHTML = "";
 
@@ -182,7 +201,6 @@ if (file.size > 10 * 1024 * 1024) {
     progressContainer.classList.remove("hidden");
 
     const formData = new FormData(form);
-
     const xhr = new XMLHttpRequest();
 
     xhr.open("POST", form.action, true);
@@ -200,8 +218,6 @@ if (file.size > 10 * 1024 * 1024) {
         submitBtn.disabled = false;
         submitBtn.innerText = "Upload & Get Link";
 
-
-
         let res = {};
         try {
             res = JSON.parse(xhr.responseText);
@@ -214,11 +230,12 @@ if (file.size > 10 * 1024 * 1024) {
 
         if (xhr.status === 422) {
             status.innerHTML =
-                Object.values(res.errors).flat().join("<br>");
+                Object.values(res.errors || {}).flat().join("<br>");
             return;
         }
 
         if (xhr.status === 200) {
+
             const fileLinkInput = document.getElementById("fileLink");
             const copyBtn = document.getElementById("copyBtn");
 
@@ -232,11 +249,8 @@ if (file.size > 10 * 1024 * 1024) {
                 setTimeout(() => (copyBtn.innerText = "Copy"), 1500);
             };
 
-                   
-
-            // reset UI
+            // reset
             fileInput.value = "";
-            fileName.textContent = "";
             progressContainer.classList.add("hidden");
             status.innerHTML = "";
         }
@@ -253,4 +267,3 @@ if (file.size > 10 * 1024 * 1024) {
 
 /* ---------------- INIT ---------------- */
 setState("upload");
-

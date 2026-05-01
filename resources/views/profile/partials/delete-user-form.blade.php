@@ -1,11 +1,11 @@
-<section class="p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
+<div class="space-y-6">
 
     <header>
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ __('Delete Account') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
         </p>
     </header>
@@ -65,4 +65,4 @@
 
     </x-modal>
 
-</section>
+</div>

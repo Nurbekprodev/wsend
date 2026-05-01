@@ -1,4 +1,4 @@
-<section class="p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm">
+<section>
 
     <header class="mb-6">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -51,7 +51,7 @@
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-            <x-button-primary class="px-6 py-2.5 rounded-xl">
+            <x-button-primary type="submit" class="px-6 py-2.5 rounded-xl">
                 {{ __('Save') }}
             </x-button-primary>
 

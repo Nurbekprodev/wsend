@@ -5,13 +5,12 @@
 
                     <!-- UPLOAD BLOCK -->
                     <div id="uploadBox">
-
                         <div id="dropZone"
                             class="border-2 border-dashed border-gray-300 dark:border-gray-600
-                                   rounded-2xl p-10 text-center cursor-pointer
-                                   hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10
-                                   bg-gray-50 dark:bg-gray-700/30
-                                   transition-all duration-200">
+                                rounded-2xl p-10 text-center cursor-pointer
+                                hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10
+                                bg-gray-50 dark:bg-gray-700/30
+                                transition-all duration-200">
 
                             <x-input 
                                 type="file" 
@@ -57,7 +56,7 @@
                             class="mt-6 w-full py-3 text-base font-semibold rounded-xl">
                             Continue
                         </x-button-primary>
-
+<p id="status" class="mt-3 text-sm text-red-500"></p>
                     </div>
 
 
