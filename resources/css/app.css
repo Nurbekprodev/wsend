@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* BASE (only element styling) */
 @layer base {
     body {
         @apply font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
@@ -11,5 +12,23 @@
 
     * {
         @apply transition-colors duration-200;
+    }
+}
+
+/* COMPONENTS (your custom classes go here) */
+@layer components {
+.fade-step {
+    transition: opacity 250ms ease, transform 250ms ease;
+    will-change: opacity, transform;
+}
+
+    .step-hidden {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    .step-visible {
+        opacity: 1;
+        transform: translateY(0px);
     }
 }

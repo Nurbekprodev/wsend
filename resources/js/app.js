@@ -27,14 +27,33 @@ const MAX_TOTAL_SIZE = 200 * 1024 * 1024; // matches backend max
 const MAX_FILES = 20;
 
 /* ---------------- State System ---------------- */
-function setState(state) {
-    uploadBox.classList.add("hidden");
-    settingsBox.classList.add("hidden");
-    resultBox.classList.add("hidden");
+let stateTimeout;
 
-    if (state === "upload") uploadBox.classList.remove("hidden");
-    if (state === "settings") settingsBox.classList.remove("hidden");
-    if (state === "result") resultBox.classList.remove("hidden");
+function setState(state) {
+    clearTimeout(stateTimeout);
+
+    const boxes = {
+        upload: uploadBox,
+        settings: settingsBox,
+        result: resultBox
+    };
+
+    // hide all
+    Object.values(boxes).forEach(box => {
+        box.classList.add("step-hidden");
+        box.classList.add("hidden");
+    });
+
+    stateTimeout = setTimeout(() => {
+        const active = boxes[state];
+
+        active.classList.remove("hidden");
+
+        // force reflow
+        void active.offsetWidth;
+
+        active.classList.remove("step-hidden");
+    }, 150);
 }
 
 /* ---------------- State ---------------- */
@@ -122,11 +141,12 @@ document.getElementById("nextBtn").addEventListener("click", () => {
         status.innerHTML = "Select at least one file";
 
         dropZone.style.borderColor = "red";
-        // dropZone.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.3)";
-
+        
         setTimeout(() => {
             dropZone.style.borderColor = "";
             dropZone.style.boxShadow = "";
+            status.innerHTML = "";
+            dropZone.style.borderColor = "";
         }, 1500);
 
         return;
@@ -194,7 +214,9 @@ form.addEventListener("submit", function (e) {
 
     status.innerHTML = "";
 
-    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitBtn = form?.querySelector('button[type="submit"]');
+    if (!submitBtn) return;
+    
     submitBtn.disabled = true;
     submitBtn.innerText = "Uploading...";
 
