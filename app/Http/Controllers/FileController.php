@@ -53,9 +53,13 @@ class FileController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
+        $totalStorage = File::where('user_id', Auth::id())->sum('file_size');
+
         $files = $query->paginate(6);
 
-        return view('dashboard', compact('files'));
+        
+
+        return view('dashboard', compact('files', 'totalStorage'));
     }
 
     public function upload()
@@ -117,7 +121,7 @@ class FileController extends Controller
 
         $validator = Validator::make($request->all(), [
             'files' => 'required|array',
-            'files.*' => 'required|file|max:10240',
+            'files.*' => 'required|file|max:10240', // 10MB per file
             'expires_in' => 'required|integer|in:1,3,7',
             'max_downloads' => 'nullable|integer|min:1|max:20',
         ]);
@@ -177,7 +181,6 @@ class FileController extends Controller
         }
 
         foreach ($files as $file) {
-
             $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getMimeType();
 
@@ -191,6 +194,15 @@ class FileController extends Controller
                 ], 422);
             }
 
+            // ✅ ADD TYPE DETECTION (FIX)
+            $type = match (true) {
+                str_starts_with($mime, 'image/') => 'image',
+                str_contains($mime, 'pdf') => 'pdf',
+                str_starts_with($mime, 'video/') => 'video',
+                in_array($ext, ['zip','rar','7z']) => 'archive',
+                default => 'other'
+            };
+
             $path = $file->store('files', config('filesystems.default'));
 
             File::create([
@@ -199,6 +211,7 @@ class FileController extends Controller
                 'file_path' => $path,
                 'file_size' => $file->getSize(),
                 'token' => $token,
+                'type' => $type, 
                 'expires_at' => now()->addDays($days),
                 'max_downloads' => $max_downloads,
                 'password' => $request->password ? bcrypt($request->password) : null,

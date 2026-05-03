@@ -62,7 +62,7 @@
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ number_format($files->sum('file_size') / 1024 / 1024, 1) }} MB
+                                {{ number_format($totalStorage / 1024 / 1024, 1) }} MB / 200 MB
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Storage used</p>
                         </div>
@@ -188,11 +188,42 @@
                                 <!-- File -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                            </svg>
-                                        </div>
+                                        
+                                    @php
+                                        $icon = match($file->type) {
+                                            'image' => [
+                                                'bg' => 'bg-green-100 dark:bg-green-900/30',
+                                                'text' => 'text-green-600 dark:text-green-400',
+                                                'svg' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18M3 19h18M5 5v14M19 5v14M8 11l2 2 4-4"/>'
+                                            ],
+                                            'pdf' => [
+                                                'bg' => 'bg-red-100 dark:bg-red-900/30',
+                                                'text' => 'text-red-600 dark:text-red-400',
+                                                'svg' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9l-6-6H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>'
+                                            ],
+                                            'video' => [
+                                                'bg' => 'bg-purple-100 dark:bg-purple-900/30',
+                                                'text' => 'text-purple-600 dark:text-purple-400',
+                                                'svg' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/>'
+                                            ],
+                                            'archive' => [
+                                                'bg' => 'bg-yellow-100 dark:bg-yellow-900/30',
+                                                'text' => 'text-yellow-600 dark:text-yellow-400',
+                                                'svg' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 11h16M4 15h16M6 3h12v4H6z"/>'
+                                            ],
+                                            default => [
+                                                'bg' => 'bg-blue-100 dark:bg-blue-900/30',
+                                                'text' => 'text-blue-600 dark:text-blue-400',
+                                                'svg' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>'
+                                            ]
+                                        };
+                                    @endphp
+
+                                    <div class="w-9 h-9 rounded-lg {{ $icon['bg'] }} flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 {{ $icon['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {!! $icon['svg'] !!}
+                                        </svg>
+                                    </div>
                                         <span class="font-medium text-gray-900 dark:text-white max-w-[180px] truncate">
                                             {{ $file->original_name }}
                                         </span>

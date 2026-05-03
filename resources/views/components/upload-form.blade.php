@@ -1,10 +1,10 @@
 <x-card class="p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
-
+            <div class="relative">
                 <form id="uploadForm" action="{{ url('/upload') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <!-- UPLOAD BLOCK -->
-                    <div id="uploadBox">
+                    <div id="uploadBox" class="fade-step step-visible">
 
                         <div id="dropZone"
                             class="border-2 border-dashed border-gray-300 dark:border-gray-600
@@ -38,8 +38,12 @@
                                 </p>
                             </div>
 
-                            <div id="fileList" class="mt-4 text-sm text-blue-600 dark:text-blue-400 space-y-1"></div>
-
+                            
+                        </div>
+                        <!-- File list -->
+                        <div 
+                            id="fileList" 
+                            class="mt-4 text-sm text-blue-600 dark:text-blue-400 space-y-1">
                         </div>
 
                         <button type="button"
@@ -57,12 +61,12 @@
                             class="mt-6 w-full py-3 text-base font-semibold rounded-xl">
                             Continue
                         </x-button-primary>
-                        <p id="status" class="mt-3 text-sm text-red-500"></p>
+                        <p id="uploadStatus" class="mt-3 text-sm text-red-500"></p>
                     </div>
 
 
                     <!-- SETTINGS BLOCK -->
-                    <div id="settingsBox" class="hidden">
+                    <div id="settingsBox" class="fade-step step-hidden">
 
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                             Transfer settings
@@ -109,7 +113,7 @@
                             <div id="progressBar" class="bg-blue-600 h-3 text-xs text-white text-center transition-all duration-300" style="width:0%"></div>
                         </div>
 
-                        <div id="status" class="mt-3 text-sm text-red-500"></div>
+                        <!-- <div id="status" class="mt-3 text-sm text-red-500"></div> -->
 
                         <div class="mt-6 flex flex-col gap-3">
                             <x-button-primary 
@@ -126,11 +130,11 @@
                                 Back 
                             </x-button-secondary>
                         </div>
-
+                        <p id="settingsStatus" class="mt-3 text-sm text-red-500"></p>
                     </div>
 
                     <!-- RESULT BLOCK -->
-                    <div id="resultBox" class="hidden">
+                    <div id="resultBox" class="fade-step step-hidden">
 
                         <!-- Success -->
                         <div class="text-center mb-6">
@@ -218,5 +222,5 @@
                     </div>
 
                 </form>
-
+            </div>
 </x-card>

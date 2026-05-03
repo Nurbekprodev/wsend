@@ -26,7 +26,10 @@ return new class extends Migration
 
             $table->unsignedBigInteger('file_size');
 
-            $table->string('token', 64)->index(); // slightly increased
+            
+            $table->string('type', 50)->default('other')->index();
+
+            $table->string('token', 64)->index();
 
             $table->timestamp('expires_at')->nullable()->index();
 
@@ -37,7 +40,7 @@ return new class extends Migration
 
             $table->string('password')->nullable();
 
-            $table->string('guest_token', 64)->nullable()->index(); // match generator
+            $table->string('guest_token', 64)->nullable()->index();
         });
     }
     /**

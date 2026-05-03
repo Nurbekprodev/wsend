@@ -6,7 +6,10 @@
             <!-- Logo + description -->
             <div class="max-w-xs">
                 <a href="{{ url('/') }}" class="flex items-center mb-4">
-                    <img src="{{ asset('images/logo_img.png') }}" alt="logo" class="h-14 w-auto">
+                    <img 
+                        src="{{ asset('images/logo_img.png') }}" 
+                        alt="logo" 
+                        class="h-16 w-auto">
                 </a>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400">
