@@ -194,7 +194,7 @@ class FileController extends Controller
                 ], 422);
             }
 
-            // ✅ ADD TYPE DETECTION (FIX)
+            // TYPE DETECTION
             $type = match (true) {
                 str_starts_with($mime, 'image/') => 'image',
                 str_contains($mime, 'pdf') => 'pdf',
