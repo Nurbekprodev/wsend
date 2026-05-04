@@ -203,7 +203,8 @@ class FileController extends Controller
                 default => 'other'
             };
 
-            $path = $file->store('files', config('filesystems.default'));
+            // stores files to AWS S3
+            $path = Storage::disk('s3')->put('files', $file);
 
             File::create([
                 'user_id' => auth()->id(),
@@ -253,9 +254,13 @@ class FileController extends Controller
         if ($files->count() == 1) {
             File::where('token', $token)->increment('downloads');
 
-            return Storage::disk($disk)->download(
-                $baseFile->file_path,
-                $baseFile->original_name
+            // Store files to S3
+            return redirect(
+                Storage::disk($disk)->temporaryUrl(
+                    $baseFile->file_path,
+                    now()->addMinutes(5),
+                    ['ResponseContentDisposition' => 'attachment; filename="'.$baseFile->original_name.'"']
+                )
             );
         }
 
@@ -276,10 +281,20 @@ class FileController extends Controller
         $added = 0;
 
         foreach ($files as $file) {
-            $fullPath = Storage::disk($disk)->path($file->file_path);
 
-            if (file_exists($fullPath)) {
-                $zip->addFile($fullPath, uniqid() . '_' . $file->original_name);
+            $tempFile = $tempDir . '/' . uniqid();
+
+            // download from S3 to temp
+            $stream = Storage::disk($disk)->readStream($file->file_path);
+
+            if ($stream) {
+                $local = fopen($tempFile, 'w+');
+                stream_copy_to_stream($stream, $local);
+
+                fclose($stream);
+                fclose($local);
+
+                $zip->addFile($tempFile, uniqid() . '_' . $file->original_name);
                 $added++;
             }
         }
@@ -291,6 +306,15 @@ class FileController extends Controller
         $zip->close();
 
         File::where('token', $token)->increment('downloads');
+
+        // delete temp files
+        foreach (glob($tempDir . '/*') as $temp) {
+            if ($temp !== $zipPath && is_file($temp)) {
+                unlink($temp);
+            }
+        }
+
+                
 
         return response()->download($zipPath)->deleteFileAfterSend(true);
     }
