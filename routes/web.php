@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function () {
 
 
 Route::get('/test', function (){
-    return  view('test');
+    return  "ok";
 });
 
 
