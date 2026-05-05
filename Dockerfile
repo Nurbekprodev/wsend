@@ -5,6 +5,10 @@ RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring zip
 
+# install Node.js (needed for Vite)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
 # install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -13,8 +17,11 @@ WORKDIR /app
 # copy project
 COPY . .
 
-# install dependencies
+# install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# install JS dependencies + build Vite assets
+RUN npm install && npm run build
 
 # Laravel required folders + permissions
 RUN mkdir -p storage/framework/cache/data \
