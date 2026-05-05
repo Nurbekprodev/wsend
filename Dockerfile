@@ -16,8 +16,12 @@ COPY . .
 # install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# permissions
-RUN chmod -R 775 storage bootstrap/cache
+# Laravel required folders + permissions
+RUN mkdir -p storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
 
