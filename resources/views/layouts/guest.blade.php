@@ -29,9 +29,9 @@
                 class="w-20 h-20 mx-auto text-gray-400">
         </a>
 
-        <!-- <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
             {{ config('app.name') }}
-        </h1> -->
+        </h1>
 
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Secure file sharing made simple

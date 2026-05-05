@@ -1,10 +1,13 @@
 <x-app-layout>
 
     <!-- HERO / UPLOAD FIRST -->
-    <x-section class="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 pt-16 pb-20">
+    <x-section class="min-h-[90vh] flex items-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 pt-6 md:pt-16 pb-8 md:pb-20">
+
         <x-container class="max-w-3xl">
 
-            <div class="text-center mb-10">
+            <!-- TEXT -->
+            <div class="text-center mb-4 md:mb-10">
+
                 <span class="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400 mb-4">
                     No signup required
                 </span>
@@ -17,11 +20,16 @@
                     Send assignments, project files, or client assets in seconds.
                     Auto delete, password protected, download limits.
                 </p>
+
             </div>
 
-            <x-upload-form/>
+            <!-- UPLOAD -->
+            <div class="mt-4 md:mt-10">
+                <x-upload-form/>
+            </div>
 
         </x-container>
+
     </x-section>
 
 

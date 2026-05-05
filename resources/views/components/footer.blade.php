@@ -44,7 +44,7 @@
         <hr class="my-8 border-gray-100 dark:border-gray-800" />
 
         <div class="text-center text-sm text-gray-400 dark:text-gray-500">
-            © {{ date('Y') }} YourApp. All rights reserved.
+            © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
         </div>
 
     </div>

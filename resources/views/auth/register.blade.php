@@ -63,9 +63,9 @@
         </div>
 
         <div class="pt-2">
-            <x-primary-button class="w-full justify-center py-3 rounded-xl text-base font-semibold">
+            <x-button-primary type="submit" class="w-full justify-center py-3 rounded-xl text-base font-semibold">
                 {{ __('Register') }}
-            </x-primary-button>
+            </x-button-primary>
         </div>
 
         <div class="text-center pt-2 text-sm text-gray-500 dark:text-gray-400">
