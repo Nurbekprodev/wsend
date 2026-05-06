@@ -204,7 +204,8 @@ class FileController extends Controller
             };
 
             // stores files to AWS S3
-            $path = Storage::disk('s3')->put('files', $file);
+            $disk = config('filesystems.default');
+            $path = Storage::disk($disk)->put('files', $file);
 
             File::create([
                 'user_id' => auth()->id(),
@@ -219,6 +220,12 @@ class FileController extends Controller
                 'guest_token' => $guestToken,
             ]);
         }
+
+        track_event('file_uploaded', [
+            'token' => $token,
+            'file_count' => count($files),
+            'total_size' => $newUploadSize,
+        ]);
 
         $response = response()->json([
             'url' => url('/file/' . $token)
@@ -254,14 +261,27 @@ class FileController extends Controller
         if ($files->count() == 1) {
             File::where('token', $token)->increment('downloads');
 
+            track_event('file_downloaded', [
+                'token' => $token,
+                'file_count' => 1
+            ]);
+
             // Store files to S3
-            return redirect(
-                Storage::disk($disk)->temporaryUrl(
+            if ($disk === 's3') {
+                return redirect(
+                    Storage::disk($disk)->temporaryUrl(
+                        $baseFile->file_path,
+                        now()->addMinutes(5),
+                        ['ResponseContentDisposition' => 'attachment; filename="'.$baseFile->original_name.'"']
+                    )
+                );
+            } else {
+                return Storage::disk($disk)->download(
                     $baseFile->file_path,
-                    now()->addMinutes(5),
-                    ['ResponseContentDisposition' => 'attachment; filename="'.$baseFile->original_name.'"']
-                )
-            );
+                    $baseFile->original_name
+                );
+            }
+
         }
 
         $zipName = Str::random(20) . '.zip';
@@ -328,6 +348,11 @@ class FileController extends Controller
         Storage::disk(config('filesystems.default'))->delete($file->file_path);
 
         $file->delete();
+
+        track_event('file_deleted', [
+            'file_id' => $file->id,
+            'file_size' => $file->file_size
+        ]);
 
         return back()->with('success', 'File deleted successfully.');
     }

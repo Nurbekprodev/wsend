@@ -1,5 +1,5 @@
 <nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
-    <div class="flex flex-wrap justify-between items-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 sm:py-3">
+    <div class="flex flex-wrap justify-between items-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
 
         <!-- Logo -->
         <a href="{{ url('/') }}" class="flex items-center gap-2 hover:opacity-90 transition">
@@ -109,6 +109,22 @@
                         Dashboard
                     </a>
                 </li>
+                @endauth
+
+
+                <!-- analytics -->
+                @auth
+                    @if(auth()->user()->is_admin)
+                        <li>
+                            <a href="{{ url('/analytics') }}"
+                            class="block px-4 py-2.5 rounded-xl text-sm font-medium transition
+                            {{ request()->is('analytics') 
+                                ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800' }}">
+                                Analytics
+                            </a>
+                        </li>
+                    @endif
                 @endauth
 
                 <!-- Guest buttons (mobile only) -->
