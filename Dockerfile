@@ -1,36 +1,49 @@
 FROM php:8.3-cli
 
-# system dependencies
+# System dependencies + PHP extensions (IMPORTANT for Laravel + S3)
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip
+    git curl zip unzip \
+    libpng-dev libonig-dev libxml2-dev libzip-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        mbstring \
+        zip \
+        xml \
+        curl \
+        fileinfo
 
-# install Node.js (for Vite)
+# Install Node.js (for Vite)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# install composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# copy project
+# Copy project
 COPY . .
 
-# install PHP dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# install JS + build assets
+# Install JS dependencies + build assets
 RUN npm install
 RUN npm run build
 
-# Laravel required folders
-RUN mkdir -p storage/framework/cache/data \
+# Laravel required folders + permissions
+RUN mkdir -p \
+    storage/framework/cache/data \
     storage/framework/sessions \
     storage/framework/views \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Create storage link (IMPORTANT for file URLs)
+RUN php artisan storage:link || true
+
 EXPOSE 10000
 
-CMD php -S 0.0.0.0:$PORT -t public
+CMD php artisan serve --host=0.0.0.0 --port=10000
