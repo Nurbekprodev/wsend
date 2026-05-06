@@ -1,10 +1,11 @@
 FROM php:8.3-cli
 
-# System dependencies + PHP extensions (IMPORTANT for Laravel + S3)
+# System dependencies + PHP extensions
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \
     libpng-dev libonig-dev libxml2-dev libzip-dev \
     libcurl4-openssl-dev \
+    libssl-dev \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
@@ -14,11 +15,11 @@ RUN apt-get update && apt-get install -y \
         curl \
         fileinfo
 
-# Install Node.js (for Vite)
+# Node.js (Vite)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Install Composer
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
@@ -26,14 +27,14 @@ WORKDIR /app
 # Copy project
 COPY . .
 
-# Install PHP dependencies
+# Install backend deps
 RUN composer install --no-dev --optimize-autoloader
 
-# Install JS dependencies + build assets
+# Install frontend deps
 RUN npm install
 RUN npm run build
 
-# Laravel required folders + permissions
+# Laravel required folders + permissions (IMPORTANT FIX)
 RUN mkdir -p \
     storage/framework/cache/data \
     storage/framework/sessions \
@@ -41,8 +42,11 @@ RUN mkdir -p \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Create storage link (IMPORTANT for file URLs)
+# Storage link
 RUN php artisan storage:link || true
+
+# Final safety permission fix
+RUN chmod -R 775 storage bootstrap/cache
 
 EXPOSE 10000
 
