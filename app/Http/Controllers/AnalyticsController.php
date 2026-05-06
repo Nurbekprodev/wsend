@@ -10,7 +10,7 @@ class AnalyticsController extends Controller
     public function index()
     
     {
-        return dd(auth()->user());
+        
         $totalUploads = DB::table('events')
             ->where('event', 'file_uploaded')
             ->count();

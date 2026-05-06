@@ -36,7 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/analytics', [AnalyticsController::class, 'index']);
+Route::get('/analytics', [AnalyticsController::class, 'index'])
+    ->middleware('admin');
 
 
 Route::get('/test', function (){
