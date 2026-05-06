@@ -1,5 +1,5 @@
 <nav x-data="{ open: false }" class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 dark:bg-gray-900/80 dark:border-gray-800">
-    <div class="flex flex-wrap justify-between items-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 sm:py-3">
+    <div class="flex flex-wrap justify-between items-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3">
 
         <!-- Logo -->
         <a href="{{ url('/') }}" class="flex items-center gap-2 hover:opacity-90 transition">
