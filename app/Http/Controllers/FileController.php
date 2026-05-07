@@ -205,7 +205,21 @@ class FileController extends Controller
 
             // stores files to AWS S3
             $disk = config('filesystems.default');
-            $path = Storage::disk($disk)->put('files', $file);
+            // $path = Storage::disk($disk)->put('files', $file);
+
+try {
+    $path = Storage::disk($disk)->put('files', $file);
+
+    return response()->json([
+        'success' => true,
+        'path' => $path
+    ]);
+
+} catch (\Throwable $e) {
+    return response()->json([
+        'error' => $e->getMessage()
+    ], 500);
+}
 
 
             File::create([
