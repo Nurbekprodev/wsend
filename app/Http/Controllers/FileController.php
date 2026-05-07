@@ -207,6 +207,7 @@ class FileController extends Controller
             $disk = config('filesystems.default');
             $path = Storage::disk($disk)->put('files', $file);
 
+
             File::create([
                 'user_id' => auth()->id(),
                 'original_name' => $file->getClientOriginalName(),
